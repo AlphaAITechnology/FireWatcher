@@ -1,5 +1,6 @@
 .env.json
 .env
+environment.yml
 
 # Created by https://www.toptal.com/developers/gitignore/api/linux,macos,windows,pycharm,intellij,clion,c,c++,visualstudiocode,cmake,conan,vcpkg
 # Edit at https://www.toptal.com/developers/gitignore?templates=linux,macos,windows,pycharm,intellij,clion,c,c++,visualstudiocode,cmake,conan,vcpkg
