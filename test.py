@@ -38,7 +38,7 @@ bins_positions_transled = cv.perspectiveTransform(np.expand_dims(np.array(bins_p
 
 floor_sim = np.zeros_like(blue_square)
 for x,y in np.squeeze(bins_positions_transled.astype(np.uint8), axis=0).tolist():
-    floor_sim = cv.circle(floor_sim, (x,y), 10, (0,255,0), -1)
+    floor_sim = cv.circle(floor_sim, (x,y), 30, (0,255,0), -1)
 
 
 im_out = cv.warpPerspective(floor_sim, M_grid2Image, (floor_image.shape[1], floor_image.shape[0]))
