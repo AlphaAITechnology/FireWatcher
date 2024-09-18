@@ -20,8 +20,8 @@ M_Image2grid, status = cv.findHomography(floor_corners, np.array([[0,0], [100, 0
 # im_out = cv.warpPerspective(floor_image, M_Image2grid, (blue_square.shape[1], blue_square.shape[0]))
 
 floor_corners_transled = cv.perspectiveTransform(np.expand_dims(floor_corners.astype(np.float32), axis=0), M_Image2grid)
-bins_positions_transled = cv.perspectiveTransform(np.expand_dims(bins_positions.astype(np.float32), axis=0), M_Image2grid)
-print(bins_positions_transled.astype(np.uint8))
+bins_positions_transled = cv.perspectiveTransform(np.expand_dims(np.array(bins_positions).reshape((-1,2)).astype(np.float32), axis=0), M_Image2grid)
+
 
 # floor_map = np.zeros_like(blue_square)
 # for x, y in floor_corners_transled.reshape((-1,2)).tolist():
@@ -30,8 +30,18 @@ print(bins_positions_transled.astype(np.uint8))
 # print(floor_corners)
 # print(floor_corners_transled)
 
-# cv.namedWindow("l", cv.WINDOW_NORMAL)
-# cv.imshow("l", im_out)
-# cv.waitKey(0)
-# cv.destroyAllWindows()
+floor_sim = np.zeros_like(blue_square)
+for x,y in np.squeeze(bins_positions_transled.astype(np.uint8), axis=0).tolist():
+    floor_sim = cv.circle(floor_sim, (x,y), 10, (0,255,0), -1)
+
+
+im_out = cv.warpPerspective(floor_sim, M_grid2Image, (floor_image.shape[1], floor_image.shape[0]))
+im_out_m = np.where(im_out[:,:,1] == 0, 1, 0).astype(np.uint8)
+im_out_m = np.stack((im_out_m, im_out_m, im_out_m), axis=2)
+im_out = (floor_image * im_out_m) + im_out
+
+cv.namedWindow("l", cv.WINDOW_NORMAL)
+cv.imshow("l", im_out)
+cv.waitKey(0)
+cv.destroyAllWindows()
 
