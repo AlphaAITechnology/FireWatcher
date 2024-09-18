@@ -20,7 +20,8 @@ M_Image2grid, status = cv.findHomography(floor_corners, np.array([[0,0], [100, 0
 # im_out = cv.warpPerspective(floor_image, M_Image2grid, (blue_square.shape[1], blue_square.shape[0]))
 
 floor_corners_transled = cv.perspectiveTransform(np.expand_dims(floor_corners.astype(np.float32), axis=0), M_Image2grid)
-print(floor_corners_transled.astype(np.uint8))
+bins_positions_transled = cv.perspectiveTransform(np.expand_dims(bins_positions.astype(np.float32), axis=0), M_Image2grid)
+print(bins_positions_transled.astype(np.uint8))
 
 # floor_map = np.zeros_like(blue_square)
 # for x, y in floor_corners_transled.reshape((-1,2)).tolist():
