@@ -36,16 +36,10 @@ for x,y in np.squeeze(bins_positions_transled.astype(np.uint8), axis=0).tolist()
 ## Draw mask out to real world perspective
 im_out = cv.warpPerspective(floor_simulation, M_grid2Image, (floor_image.shape[1], floor_image.shape[0]))
 
-## Draw on to image for visualizaztion
-im_out_m = np.where(im_out[:,:,1] == 0, 1, 0).astype(np.uint8)
-im_out_m = np.stack((im_out_m, im_out_m, im_out_m), axis=2)
-im_out = (floor_image * im_out_m) + im_out
+im_out = np.where(np.add.reduce(im_out.astype(np.uint64), axis=2)>0, 1, 0).astype(np.uint8)
 
-## Display
-cv.namedWindow("l", cv.WINDOW_NORMAL)
-cv.imshow("l", im_out)
-cv.waitKey(0)
-cv.destroyAllWindows()
+print(im_out.shape)
+
 
 
 
