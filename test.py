@@ -12,8 +12,14 @@ blue_square[:,:,0] = 255
 
 
 floor_corners, bins_positions = create_labels(floor_image, (0,0,0))
+
+
+
+
+
+
 # M_grid2Image, status = cv.findHomography(np.array([[450,450], [450,550], [550,550], [550,550]]), floor_corners)
-M_grid2Image, status = cv.findHomography(np.array([[0,0], [0,100], [100,100], [100,0]]), floor_corners)
+M_grid2Image, status = cv.findHomography(np.array([[0,0], [100, 0], [100,100], [0, 100]]), floor_corners)
 M_Image2grid, status = cv.findHomography(floor_corners, np.array([[0,0], [100, 0], [100,100], [0, 100]]))
 
 # im_out = cv.warpPerspective(blue_square, M_grid2Image, (floor_image.shape[1], floor_image.shape[0]))

@@ -30,6 +30,7 @@ def create_labels(img, mask_color=(0,0,0)):
                 break
         cv.destroyAllWindows()
 
-        return (cv.convexHull(np.array(points), returnPoints=True).reshape((-1,2)), bins)
+        # return (cv.convexHull(np.array(points), returnPoints=True).reshape((-1,2)), bins)
+        return np.array(points)
 
 ##! Can help create the layout for the dustbin placement
