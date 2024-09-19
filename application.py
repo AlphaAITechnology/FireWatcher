@@ -122,10 +122,14 @@ def ImageAnalysis():
 
 
 def ImageCapture_IO():
-    if (not cameras_links.empty()):
-        cameras_il = cameras_links.get()
-        cameras_link = cameras_il["link"]
-        cameras_id = cameras_il["uid"]
+    cameras_link = None
+    cameras_id = None
+
+    while cameras_link is None:
+        if (not cameras_links.empty()):
+            cameras_il = cameras_links.get()
+            cameras_link = cameras_il["link"]
+            cameras_id = cameras_il["uid"]
 
     cap = cv.VideoCapture(cameras_link, cv.CAP_FFMPEG)
     fpso = cap.get(cv.CAP_PROP_FPS) * 2
