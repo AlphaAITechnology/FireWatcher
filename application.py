@@ -140,13 +140,13 @@ def ImageCapture_IO():
         try:
             while cap.isOpened():
                 count += 1
-                read = cap.grab()
-                print(f"Image Grabbed:\t{count}")
-                if (count%frame_const == 0 and read):
-                    ret, frame = cap.retrieve()
+                ret, frame = cap.retrieve()
+                print(f"Image Read:\t{count}")
+                if (count%frame_const == 0):
                     if ret and capture_images_q.empty():
                         print(f"Image Retrieved and Sent:\t{count}")
                         capture_images_q.put((f"{datetime.datetime.now().isoformat()}@{cameras_id}", frame))
+                del frame
                 time.sleep(1/fpso)
 
         except Exception as e:
