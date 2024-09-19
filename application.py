@@ -129,17 +129,19 @@ def ImageCapture_IO():
 
     cap = cv.VideoCapture(cameras_link, cv.CAP_FFMPEG)
     fpso = cap.get(cv.CAP_PROP_FPS) * 2
-    count = 0       # counting number of frames read
+    count = -1       # counting number of frames read
     frame_const = fpso//2 # reading every fifth frame
 
     while(elegant_shutdown.empty()):
         try:
             while cap.isOpened():
-                read = cap.grab()
                 count += 1
+                read = cap.grab()
+                print(f"Image Grabbed:\t{count}")
                 if (count%frame_const == 0 and read):
                     ret, frame = cap.retrieve()
                     if ret and capture_images_q.empty():
+                        print(f"Image Retrieved and Sent:\t{count}")
                         capture_images_q.put((f"{datetime.datetime.now().isoformat()}@{cameras_id}", frame))
                 time.sleep(1/fpso)
 
