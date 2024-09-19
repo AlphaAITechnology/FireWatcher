@@ -1,6 +1,7 @@
 import argparse
 import cv2 as cv
 import datetime
+import gzip
 import json
 import numpy as np
 import os
@@ -73,7 +74,7 @@ def ImageSaving_IO():
             camera_TID, img = printing_images_q.get()
             img_path = f"./saved_images/{camera_TID}.webp"
             cv.imwrite(img_path, img)
-            sending_images_q.put(img_path)
+            # sending_images_q.put(img_path)
             
             del img
             del camera_TID
@@ -89,8 +90,9 @@ def detect(results, conf, classes):
 
 def ImageAnalysis():
     model = torch.hub.load("ultralytics/yolov5", "yolov5s")
-    roi_mask = np.loadtxt("./FloorMask.csv.gz", delimiter=',').astype(np.uint8)
-    roi_mask = np.stack((roi_mask, roi_mask, roi_mask), axis=2)
+    with gzip.open("./FloorMask.csv.gz") as mask_gz:
+        roi_mask = np.loadtxt(mask_gz, delimiter=',').astype(np.uint8)
+        roi_mask = np.stack((roi_mask, roi_mask, roi_mask), axis=2)
 
     minimum_confidence = 0.4
 
@@ -108,15 +110,12 @@ def ImageAnalysis():
                     analysis_image[int(y_min):int(y_max), int(x_min):int(x_max)] = 1
                 
                 roi_intersect = np.where((roi_mask * analysis_image)==1, 1, 0).astype(np.uint64)
-                if np.add.reduce(np.add.reduce(roi_intersect, axis=0).reshape((-1,)))>0:
+                if np.add.reduce(roi_intersect.reshape((-1,)))>0:
                     printing_images_q.put((camera_TID, img))
-
-                else:
-                    del img
-                    del camera_TID
-            else:
-                del img
-                del camera_TID
+                
+                
+            del img
+            del camera_TID
 
     elegant_shutdown.put(True)
 
@@ -140,15 +139,14 @@ def ImageCapture_IO():
         try:
             while cap.isOpened():
                 count += 1
-                ret, frame = cap.retrieve()
-                print(f"Image Read:\t{count}")
-                if (count%frame_const == 0):
+                ret = cap.grab()
+                if (count%frame_const == 0 and ret):
+                    ret, frame = cap.retrieve()
                     if ret and capture_images_q.empty():
                         print(f"Image Retrieved and Sent:\t{count}")
                         capture_images_q.put((f"{datetime.datetime.now().isoformat()}@{cameras_id}", frame))
-                del frame
-                time.sleep(1/fpso)
 
+                time.sleep(1/fpso)
         except Exception as e:
             cap.release()
             elegant_shutdown.put(True)
