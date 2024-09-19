@@ -106,7 +106,7 @@ def ImageAnalysis():
                 results_np = results[["xmin", "ymin", "xmax", "ymax"]].to_numpy().tolist()
                 analysis_image = np.zeros_like(roi_mask)
                 for x_min, y_min, x_max, y_max in results_np:
-                    analysis_image[int(y_min):int(y_max), int(x_min):int(x_max)] = 1
+                    analysis_image[min([int(y_min), int(y_max)-20]):int(y_max), int(x_min):int(x_max)] = 1
                 
                 roi_intersect = np.where((roi_mask * analysis_image)==1, 1, 0).astype(np.uint64)
                 if np.add.reduce(roi_intersect.reshape((-1,)))>0:
@@ -138,6 +138,7 @@ def ImageCapture_IO():
             while cap.isOpened():
                 count += 1
                 ret = cap.grab()
+
                 if (count%frame_const == 0 and ret):
                     ret, frame = cap.retrieve()
                     if ret and capture_images_q.empty():
