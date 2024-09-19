@@ -55,8 +55,6 @@ def ImageSending_IO():
             # Delete image from disks
             os.remove(img_path)
             del img_path
-        time.sleep(0.2)
-
 
     elegant_shutdown.put(True)
 
@@ -79,8 +77,6 @@ def ImageSaving_IO():
             
             del img
             del camera_TID
-
-        time.sleep(0.1)
 
     elegant_shutdown.put(True)
 
@@ -122,7 +118,6 @@ def ImageAnalysis():
                 del img
                 del camera_TID
 
-        time.sleep(0.01)
     elegant_shutdown.put(True)
 
 
