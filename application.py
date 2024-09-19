@@ -54,6 +54,7 @@ def ImageSending_IO():
 
             # Delete image from disks
             os.remove(img_path)
+            del img_path
         time.sleep(0.2)
 
 
@@ -75,6 +76,10 @@ def ImageSaving_IO():
             img_path = f"./saved_images/{camera_TID}.webp"
             cv.imwrite(img_path, img)
             sending_images_q.put(img_path)
+            
+            del img
+            del camera_TID
+
         time.sleep(0.1)
 
     elegant_shutdown.put(True)
@@ -109,6 +114,13 @@ def ImageAnalysis():
                 roi_intersect = np.where(roi_mask == analysis_image, 1, 0).astype(np.uint64)
                 if np.add.reduce(np.add.reduce(roi_intersect, axis=0).reshape((-1,)))>0:
                     printing_images_q.put((camera_TID, img))
+
+                else:
+                    del img
+                    del camera_TID
+            else:
+                del img
+                del camera_TID
 
         time.sleep(0.01)
     elegant_shutdown.put(True)
