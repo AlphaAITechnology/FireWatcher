@@ -131,6 +131,9 @@ def ImageCapture_IO():
             cameras_link = cameras_il["link"]
             cameras_id = cameras_il["uid"]
 
+    print("Link Found")
+    time.sleep(1)
+
     cap = cv.VideoCapture(cameras_link, cv.CAP_FFMPEG)
     fpso = cap.get(cv.CAP_PROP_FPS) * 2
     count = -1       # counting number of frames read
