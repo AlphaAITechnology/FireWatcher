@@ -99,11 +99,18 @@ def ImageAnalysis():
             camera_TID, img = capture_images_q.get()
             results = model(img)
             results = detect(results, minimum_confidence, [0])
-            if results is not None:
-                print(results, end="\n\n---------\n")
-                printing_images_q.put((camera_TID, img))
 
-        time.sleep(0.05)
+            if results is not None:
+                results_np = results[["xmin", "ymin", "xmax", "ymax"]].to_numpy().tolist()
+                analysis_image = np.zeros_like(roi_mask)
+                for x_min, y_min, x_max, y_max in results_np:
+                    analysis_image[int(y_min):int(y_max), int(x_min):int(x_max)] = 1
+                
+                roi_intersect = np.where(roi_mask == analysis_image, 1, 0).astype(np.uint64)
+                if np.add.reduce(np.add.reduce(roi_intersect, axis=0).reshape((-1,)))>0:
+                    printing_images_q.put((camera_TID, img))
+
+        time.sleep(0.01)
     elegant_shutdown.put(True)
 
 
