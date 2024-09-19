@@ -96,7 +96,6 @@ def ImageAnalysis():
 
     minimum_confidence = 0.4
 
-
     while elegant_shutdown.empty():
         while not capture_images_q.empty():
             camera_TID, img = capture_images_q.get()
@@ -113,7 +112,6 @@ def ImageAnalysis():
                 if np.add.reduce(roi_intersect.reshape((-1,)))>0:
                     printing_images_q.put((camera_TID, img))
                 
-
             del img
             del camera_TID
 
