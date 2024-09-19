@@ -4,7 +4,7 @@ from .CreateFloorHotspot import create_labels
 
 
 
-def get_roi_mask(floor_image):
+def get_roi_mask(floor_image, pizel_size=30):
     floor_simulation = np.zeros((100,100, 3), dtype=np.uint8)
 
     ## Read values from GUI input
@@ -27,7 +27,7 @@ def get_roi_mask(floor_image):
     ## Dray circle for ROI detetctions
     for x,y in np.squeeze(bins_positions_transled.astype(np.uint8), axis=0).tolist():
         # Can adjust radius here
-        floor_simulation = cv.circle(floor_simulation, (x,y), 30, (0,255,0), -1)
+        floor_simulation = cv.circle(floor_simulation, (x,y), pizel_size, (0,255,0), -1)
 
     ## Draw mask out to real world perspective
     im_out = cv.warpPerspective(floor_simulation, M_grid2Image, (floor_image.shape[1], floor_image.shape[0]))

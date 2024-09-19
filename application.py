@@ -122,17 +122,17 @@ def ImageAnalysis():
 
 
 def ImageCapture_IO():
+    if (not cameras_links.empty()):
+        cameras_il = cameras_links.get()
+        cameras_link = cameras_il["link"]
+        cameras_id = cameras_il["uid"]
+
+    cap = cv.VideoCapture(cameras_link, cv.CAP_FFMPEG)
+    fpso = cap.get(cv.CAP_PROP_FPS) * 2
+    count = 0       # counting number of frames read
+    frame_const = fpso//2 # reading every fifth frame
+
     while(elegant_shutdown.empty()):
-        if (not cameras_links.empty()):
-            cameras_il = cameras_links.get()
-            cameras_link = cameras_il["link"]
-            cameras_id = cameras_il["uid"]
-
-        cap = cv.VideoCapture(cameras_link, cv.CAP_FFMPEG)
-        fpso = cap.get(cv.CAP_PROP_FPS) * 2
-        count = 0       # counting number of frames read
-        frame_const = fpso//2 # reading every fifth frame
-
         try:
             while cap.isOpened():
                 read = cap.grab()
@@ -171,9 +171,9 @@ def main():
         cameras_links.put(cameras[args.env_camera])
     if (not ((args.rtsp is None) or (args.uuid is None))):
         cameras_links.put({
-      "uid": args.uuid,
-      "link": args.rtsp
-    })
+                "uid": args.uuid,
+                "link": args.rtsp
+            })
     
 
     
