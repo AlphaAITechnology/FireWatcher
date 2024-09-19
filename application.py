@@ -74,7 +74,7 @@ def ImageSaving_IO():
             camera_TID, img = printing_images_q.get()
             img_path = f"./saved_images/{camera_TID}.webp"
             cv.imwrite(img_path, img)
-            # sending_images_q.put(img_path)
+            sending_images_q.put(img_path)
             
             del img
             del camera_TID
@@ -113,7 +113,7 @@ def ImageAnalysis():
                 if np.add.reduce(roi_intersect.reshape((-1,)))>0:
                     printing_images_q.put((camera_TID, img))
                 
-                
+
             del img
             del camera_TID
 
