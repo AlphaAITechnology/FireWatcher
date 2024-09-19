@@ -144,7 +144,7 @@ def ImageCapture_IO():
                 count += 1
                 if (count%frame_const == 0 and read):
                     ret, frame = cap.retrieve()
-                    if ret:
+                    if ret and capture_images_q.empty():
                         capture_images_q.put((f"{datetime.datetime.now().isoformat()}@{cameras_id}", frame))
                 time.sleep(1/fpso)
 
