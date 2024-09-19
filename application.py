@@ -107,7 +107,7 @@ def ImageAnalysis():
                 for x_min, y_min, x_max, y_max in results_np:
                     analysis_image[int(y_min):int(y_max), int(x_min):int(x_max)] = 1
                 
-                roi_intersect = np.where(roi_mask == analysis_image, 1, 0).astype(np.uint64)
+                roi_intersect = np.where((roi_mask * analysis_image)==1, 1, 0).astype(np.uint64)
                 if np.add.reduce(np.add.reduce(roi_intersect, axis=0).reshape((-1,)))>0:
                     printing_images_q.put((camera_TID, img))
 
@@ -130,9 +130,6 @@ def ImageCapture_IO():
             cameras_il = cameras_links.get()
             cameras_link = cameras_il["link"]
             cameras_id = cameras_il["uid"]
-
-    print("Link Found")
-    time.sleep(1)
 
     cap = cv.VideoCapture(cameras_link, cv.CAP_FFMPEG)
     fpso = cap.get(cv.CAP_PROP_FPS) * 2
