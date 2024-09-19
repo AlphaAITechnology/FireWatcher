@@ -2,7 +2,7 @@ import argparse
 import cv2 as cv
 import datetime
 import json
-# import numpy as np
+import numpy as np
 import os
 import queue
 import requests as req
@@ -88,6 +88,9 @@ def detect(results, conf, classes):
 
 def ImageAnalysis():
     model = torch.hub.load("ultralytics/yolov5", "yolov5s")
+    roi_mask = np.loadtxt("./FloorMask.csv.gz", delimiter=',').astype(np.uint8)
+    roi_mask = np.stack((roi_mask, roi_mask, roi_mask), axis=2)
+
     minimum_confidence = 0.4
 
 
@@ -97,6 +100,7 @@ def ImageAnalysis():
             results = model(img)
             results = detect(results, minimum_confidence, [0])
             if results is not None:
+                print(results, end="\n\n---------\n")
                 printing_images_q.put((camera_TID, img))
 
         time.sleep(0.05)

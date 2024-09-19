@@ -1,8 +1,9 @@
+from libs.CreateROIMasks import get_roi_mask
+import argparse
 import cv2 as cv
 import numpy as np
-from libs.CreateROIMasks import get_roi_mask
 import os
-import argparse
+
 
 def builder(img_path, save_path):
     
