@@ -5,6 +5,7 @@ import os
 import argparse
 
 def builder(img_path, save_path):
+    
     if not (os.path.exists(img_path) and os.path.isfile(img_path)):
         raise ValueError("File Not Found")
     else:
@@ -14,9 +15,9 @@ def builder(img_path, save_path):
             else:
                 raise ValueError("Save Path not available")
 
-            img = cv.imread(img_path)
-            mask = get_roi_mask(img)
-            np.savetxt(save_path, mask, delimiter=',')
+        img = cv.imread(img_path)
+        mask = get_roi_mask(img)
+        np.savetxt(save_path, mask, delimiter=',')
 
 def main():
     parser = argparse.ArgumentParser(description='Draw Floor and Bin Simulation')
@@ -32,5 +33,5 @@ def main():
             print(e)
 
 
-if __name__ == "__main":
+if __name__ == "__main__":
     main()
