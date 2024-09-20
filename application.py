@@ -137,6 +137,8 @@ def ImageCapture_IO():
                 count += 1
                 ret = cap.grab()
                 print("Grab Successful" if ret else "Grab Failed")
+                if (not ret):
+                    raise ValueError("Grab Failure")
 
                 if (count%(frame_const//5) == 0 and ret): # keeping it to 5 frames per second or less
                     ret, frame = cap.retrieve()
