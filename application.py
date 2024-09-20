@@ -152,6 +152,11 @@ def ImageCapture_IO():
                 time.sleep(1/fpso)
         except Exception as e:
             cap.release()
+
+            print(f"cameras_links queue size:\t\t{cameras_links.qsize()}")
+            print(f"capture_images_q queue size:\t\t{capture_images_q.qsize()}")
+            print(f"printing_images_q queue size:\t\t{printing_images_q.qsize()}")
+
             elegant_shutdown.put(True)
             print(e)
 
