@@ -131,36 +131,39 @@ def ImageCapture_IO():
     count = -1       # counting number of frames read
     frame_const = fpso//2 # reading every fifth frame
 
+    recover = 0
     while(elegant_shutdown.empty()):
         try:
             while cap.isOpened():
                 count += 1
                 ret = cap.grab()
-                print("Grab Successful" if ret else "Grab Failed")
-                if (not ret):
-                    raise ValueError("Grab Failure")
 
-                if (count%(frame_const//5) == 0 and ret): # keeping it to 5 frames per second or less
+                if (not ret):
+                    recover += 1
+                    if (recover < 10):
+                        print("Grab Failure")
+                        cap.release()
+                        cap = cv.VideoCapture(cameras_link, cv.CAP_FFMPEG)
+                    else:
+                        raise ValueError("Grab Failure")
+
+                if (count%(frame_const//5) == 0): # keeping it to 5 frames per second or less
                     ret, frame = cap.retrieve()
     
-                    print("Retrieve Successful" if ret else "Retrieve Failed")
+                    if (not ret):
+                        raise ValueError("Retrieve Failure")
 
                     if ret and capture_images_q.empty():
+                        recover = 0
                         print(f"Sent Successful:\t{count}")
                         capture_images_q.put((f"{datetime.datetime.now().isoformat()}@{cameras_id}", frame))
 
                 time.sleep(1/fpso)
         except Exception as e:
-            cap.release()
-
-            print(f"cameras_links queue size:\t\t{cameras_links.qsize()}")
-            print(f"capture_images_q queue size:\t\t{capture_images_q.qsize()}")
-            print(f"printing_images_q queue size:\t\t{printing_images_q.qsize()}")
-
-            elegant_shutdown.put(True)
             print(e)
-
-    elegant_shutdown.put(True)
+        finally:
+            cap.release()
+            elegant_shutdown.put(True)
 
 
 
