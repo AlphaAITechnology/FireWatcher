@@ -54,7 +54,7 @@ def ImageSending_IO():
                 print("File Upload Unsucessful:\t", file_upload_response.status_code)
 
             # Delete image from disks
-            os.remove(img_path)
+            # os.remove(img_path) ## --> TODO: Exists for debugging
             del img_path
 
     elegant_shutdown.put(True)
@@ -161,9 +161,7 @@ def main():
     parser = argparse.ArgumentParser(description='Watch Cameras for Humans')
     parser.add_argument('--rtsp', type=str, help='rtsp link for camera', default=None)
     parser.add_argument('--uuid', type=str, help='rtsp link for camera', default=None)
-
     parser.add_argument('--env_camera', type=int, help='index of camera from .env.json file', default=0)
-    
     args = parser.parse_args()
 
     cameras = None
