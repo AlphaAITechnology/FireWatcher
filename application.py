@@ -105,12 +105,11 @@ def ImageAnalysis():
             if results is not None:
                 results_np = results[["xmin", "ymin", "xmax", "ymax"]].to_numpy().tolist()
                 
-                for x_min, y_min, x_max, y_max in results_np:
+                for x_min, _, x_max, y_max in results_np:
                     if np.add.reduce(roi_mask[y_max, x_min:x_max].reshape((-1,))) > 0:
                         printing_images_q.put((camera_TID, img))
                         break
                     
-                
             del img
             del camera_TID
 
@@ -138,7 +137,7 @@ def ImageCapture_IO():
                 count += 1
                 ret = cap.grab()
 
-                if (count%frame_const == 0 and ret):
+                if (count%(frame_const//5) == 0 and ret): # keeping it to 5 frames per second or less
                     ret, frame = cap.retrieve()
                     if ret and capture_images_q.empty():
                         print(f"Image Retrieved and Sent:\t{count}")
