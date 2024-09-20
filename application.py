@@ -106,7 +106,7 @@ def ImageAnalysis():
                 results_np = results[["xmin", "ymin", "xmax", "ymax"]].to_numpy().tolist()
                 
                 for x_min, _, x_max, y_max in results_np:
-                    if np.add.reduce(roi_mask[y_max, x_min:x_max].reshape((-1,))) > 0:
+                    if np.add.reduce(roi_mask[int(y_max), int(x_min):int(x_max)].reshape((-1,))) > 0:
                         printing_images_q.put((camera_TID, img))
                         break
                     
