@@ -136,11 +136,15 @@ def ImageCapture_IO():
             while cap.isOpened():
                 count += 1
                 ret = cap.grab()
+                print("Grab Successful" if ret else "Grab Failed")
 
                 if (count%(frame_const//5) == 0 and ret): # keeping it to 5 frames per second or less
                     ret, frame = cap.retrieve()
+    
+                    print("Retrieve Successful" if ret else "Retrieve Failed")
+
                     if ret and capture_images_q.empty():
-                        print(f"Image Retrieved and Sent:\t{count}")
+                        print(f"Sent Successful:\t{count}")
                         capture_images_q.put((f"{datetime.datetime.now().isoformat()}@{cameras_id}", frame))
 
                 time.sleep(1/fpso)
