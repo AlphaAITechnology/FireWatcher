@@ -126,7 +126,7 @@ def ImageCapture_IO():
             cameras_link = cameras_il["link"]
             cameras_id = cameras_il["uid"]
 
-    cap = cv.VideoCapture(cameras_link, cv.CAP_GSTREAMER)
+    cap = cv.VideoCapture(cameras_link)
     fpso = cap.get(cv.CAP_PROP_FPS) * 2
     count = -1       # counting number of frames read
     frame_const = fpso//2 # reading every fifth frame
@@ -143,7 +143,7 @@ def ImageCapture_IO():
                     if (recover < 10):
                         print("Grab Failure")
                         cap.release()
-                        cap = cv.VideoCapture(cameras_link, cv.CAP_GSTREAMER)
+                        cap = cv.VideoCapture(cameras_link)
                     else:
                         raise ValueError("Grab Failure")
 
