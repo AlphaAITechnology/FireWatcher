@@ -91,8 +91,7 @@ def detect(results, conf, classes):
 def ImageAnalysis():
     model = torch.hub.load("ultralytics/yolov5", "yolov5s")
     with gzip.open("./FloorMask.csv.gz") as mask_gz:
-        roi_mask = np.loadtxt(mask_gz, delimiter=',').astype(np.uint8)
-        # roi_mask = np.stack((roi_mask, roi_mask, roi_mask), axis=2)
+        roi_mask = np.loadtxt(mask_gz, delimiter=',').astype(np.uint64)
 
     minimum_confidence = 0.4
 
