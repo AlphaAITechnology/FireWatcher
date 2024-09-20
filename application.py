@@ -144,6 +144,7 @@ def ImageCapture_IO():
                         print("Grab Failure")
                         cap.release()
                         cap = cv.VideoCapture(cameras_link)
+                        continue
                     else:
                         raise ValueError("Grab Failure")
 
