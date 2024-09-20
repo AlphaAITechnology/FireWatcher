@@ -97,22 +97,25 @@ def ImageAnalysis():
     minimum_confidence = 0.4
 
     while elegant_shutdown.empty():
-        while not capture_images_q.empty():
-            camera_TID, img = capture_images_q.get()
-            results = model(img)
-            results = detect(results, minimum_confidence, [0])
+        try:
+            while not capture_images_q.empty():
+                camera_TID, img = capture_images_q.get()
+                results = model(img)
+                results = detect(results, minimum_confidence, [0])
 
-            if results is not None:
-                results_np = results[["xmin", "ymin", "xmax", "ymax"]].to_numpy().tolist()
-                
-                for x_min, _, x_max, y_max in results_np:
-                    if np.add.reduce(roi_mask[int(y_max), int(x_min):int(x_max)].reshape((-1,))) > 0:
-                        printing_images_q.put((camera_TID, img))
-                        break
+                if results is not None:
+                    results_np = results[["xmin", "ymin", "xmax", "ymax"]].to_numpy().tolist()
                     
-            del img
-            del camera_TID
-
+                    for x_min, _, x_max, y_max in results_np:
+                        if np.add.reduce(roi_mask[int(y_max), int(x_min):int(x_max)].reshape((-1,))) > 0:
+                            printing_images_q.put((camera_TID, img))
+                            break
+                        
+                del img
+                del camera_TID
+        except Exception as e:
+            print(e)
+            elegant_shutdown.put(True)
     elegant_shutdown.put(True)
 
 
