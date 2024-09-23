@@ -24,7 +24,9 @@ def create_labels(img, mask_color=(0,0,0)):
         while True:
             img_c = img.copy()
             img_c = cv.fillPoly(img.copy(), [cv.convexHull(np.array(points), returnPoints=True).reshape((-1,2))], mask_color) if len(points)==4 else img_c
-            
+            for bin in bins:
+                cv.circle(img_c, bin,5,(0,255,0),-1)
+
             cv.imshow("Image", img_c)
             if cv.waitKey(1) & 0xFF == ord("q"):
                 break
