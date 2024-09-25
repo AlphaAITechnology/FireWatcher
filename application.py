@@ -135,7 +135,7 @@ def detect(results, conf, classes):
 
 
 def FireAnalysis():
-    model = torch.hub.load("ultralytics/yolov5", 'custom', "./Weights/FireDetection.pt")
+    model = torch.hub.load("ultralytics/yolov5", 'custom', "./Weights/FireDetection.pt", device=0)
     print("Fire Model Loaded")
     minimum_confidence = 0.4
 
@@ -158,7 +158,7 @@ def FireAnalysis():
 
 
 def HumanAnalysis():
-    model = torch.hub.load("ultralytics/yolov5", "yolov5s")
+    model = torch.hub.load("ultralytics/yolov5", "yolov5s", device=1)
     print("Human Model Loaded")
     with gzip.open("./FloorMask.csv.gz") as mask_gz:
         roi_mask = np.loadtxt(mask_gz, delimiter=',').astype(np.uint64)
