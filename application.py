@@ -135,7 +135,8 @@ def detect(results, conf, classes):
 
 
 def FireAnalysis():
-    model = torch.hub.load("ultralytics/yolov5", "./Weights/FireDetection.pt")
+    model = torch.hub.load("ultralytics/yolov5", 'custom', "./Weights/FireDetection.pt")
+    print("Fire Model Loaded")
     minimum_confidence = 0.4
 
     while elegant_shutdown.empty():
@@ -158,6 +159,7 @@ def FireAnalysis():
 
 def HumanAnalysis():
     model = torch.hub.load("ultralytics/yolov5", "yolov5s")
+    print("Human Model Loaded")
     with gzip.open("./FloorMask.csv.gz") as mask_gz:
         roi_mask = np.loadtxt(mask_gz, delimiter=',').astype(np.uint64)
 
@@ -268,14 +270,15 @@ def main():
     
     p1 = threading.Thread(target=ImageCapture_IO)
     p2 = threading.Thread(target=HumanAnalysis)
-    p2 = threading.Thread(target=FireAnalysis)
     p3 = threading.Thread(target=ImageSaving_IO)
     p4 = threading.Thread(target=ImageSending_IO)
+    p5 = threading.Thread(target=FireAnalysis)
 
     p1.start()
     p2.start()
     p3.start()
     p4.start()
+    p5.start()
 
 
 
