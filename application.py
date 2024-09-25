@@ -108,7 +108,7 @@ def ImageSaving_IO():
     while elegant_shutdown.empty():
         while(not printing_images_f.empty()):
             camera_TID, img = printing_images_f.get()
-            img_path = f"./saved_images/{camera_TID}.webp"
+            img_path = f"./saved_images/f_{camera_TID}.webp"
             cv.imwrite(img_path, img)
             sending_images_f.put(img_path)
             
