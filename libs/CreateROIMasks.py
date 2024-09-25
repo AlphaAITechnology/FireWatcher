@@ -35,6 +35,11 @@ def get_roi_mask(floor_image, pizel_size=30):
 
     return im_out
 
+
+
+
+
+
 def draw_roi_mask(floor_image, draw_on_picture=False):
     floor_simulation = np.zeros((100,100, 3), dtype=np.uint8)
 

@@ -23,6 +23,42 @@ def ImageSending_IO():
     print("x_api_token loaded from .env file")
 
     while elegant_shutdown.empty():
+        # Handle Fire Detection 
+        while(not sending_images_f.empty()):
+            img_path = sending_images_f.get()
+            camera_id = os.path.basename(img_path).split('@')[1].split('.')[0]
+
+            with open(img_path, "rb") as files_:
+                # storing file
+                file_upload_response = req.post(
+                    f"{base_url}/file",
+                    files={'file': (img_path, files_, 'image/webp')},
+                    headers={"x-api-token": x_api_token},
+                )
+            if (file_upload_response.status_code == 201):
+                upload_response = json.loads(file_upload_response.text)
+                alert_response = req.post(
+                        f"{base_url}/alert-record",
+                        headers={"x-api-token": x_api_token},
+                        data={
+                            "url": upload_response["fileUrl"],
+                            "type": "FIRE",
+                            "cameraId": camera_id
+                        }
+                    )
+                
+                if (alert_response.status_code >= 200 or alert_response.status_code <= 203):
+                    print(alert_response.text)
+                else:
+                    print("Alert Upload Unsucessful:\t", alert_response.status_code)
+            else:
+                print("File Upload Unsucessful:\t", file_upload_response.status_code)
+
+            # Delete image from disks
+            os.remove(img_path) ## --> TODO: Exists for debugging
+            del img_path
+
+        # Handle Human Detection 
         while(not sending_images_q.empty()):
             img_path = sending_images_q.get()
             camera_id = os.path.basename(img_path).split('@')[1].split('.')[0]
@@ -54,7 +90,7 @@ def ImageSending_IO():
                 print("File Upload Unsucessful:\t", file_upload_response.status_code)
 
             # Delete image from disks
-            # os.remove(img_path) ## --> TODO: Exists for debugging
+            os.remove(img_path) ## --> TODO: Exists for debugging
             del img_path
 
     elegant_shutdown.put(True)
@@ -70,6 +106,15 @@ def ImageSaving_IO():
         os.mkdir("./saved_images")
     
     while elegant_shutdown.empty():
+        while(not printing_images_f.empty()):
+            camera_TID, img = printing_images_f.get()
+            img_path = f"./saved_images/{camera_TID}.webp"
+            cv.imwrite(img_path, img)
+            sending_images_f.put(img_path)
+            
+            del img
+            del camera_TID
+
         while(not printing_images_q.empty()):
             camera_TID, img = printing_images_q.get()
             img_path = f"./saved_images/{camera_TID}.webp"
@@ -88,7 +133,30 @@ def detect(results, conf, classes):
     res[res["class"].isin(classes)]
     return res if res.size>0 else None
 
-def ImageAnalysis():
+
+def FireAnalysis():
+    model = torch.hub.load("ultralytics/yolov5", "./Weights/FireDetection.pt")
+    minimum_confidence = 0.4
+
+    while elegant_shutdown.empty():
+        try:
+            while not capture_images_f.empty():
+                camera_TID, img = capture_images_f.get()
+                results = model(img)
+                results = detect(results, minimum_confidence, [0, 1])
+
+                if results is not None:
+                    printing_images_f.put((camera_TID, img))
+                        
+                del img
+                del camera_TID
+        except Exception as e:
+            print(e)
+            elegant_shutdown.put(True)
+    elegant_shutdown.put(True)
+
+
+def HumanAnalysis():
     model = torch.hub.load("ultralytics/yolov5", "yolov5s")
     with gzip.open("./FloorMask.csv.gz") as mask_gz:
         roi_mask = np.loadtxt(mask_gz, delimiter=',').astype(np.uint64)
@@ -156,10 +224,12 @@ def ImageCapture_IO():
                     if (not ret):
                         raise ValueError("Retrieve Failure")
 
-                    if ret and capture_images_q.empty():
+                    if ret and (capture_images_q.empty() and capture_images_f.empty()):
                         recover = 0
                         print(f"Sent Successful:\t{count}")
-                        capture_images_q.put((f"{datetime.datetime.now().isoformat()}@{cameras_id}", frame))
+                        capture_images_q.put((f"{datetime.datetime.now().isoformat()}@{cameras_id}", frame[:,:,:]))
+                        capture_images_f.put((f"{datetime.datetime.now().isoformat()}@{cameras_id}", frame[:,:,:]))
+                        del frame
 
                 time.sleep(1/fpso)
         except Exception as e:
@@ -197,7 +267,8 @@ def main():
 
     
     p1 = threading.Thread(target=ImageCapture_IO)
-    p2 = threading.Thread(target=ImageAnalysis)
+    p2 = threading.Thread(target=HumanAnalysis)
+    p2 = threading.Thread(target=FireAnalysis)
     p3 = threading.Thread(target=ImageSaving_IO)
     p4 = threading.Thread(target=ImageSending_IO)
 
@@ -211,7 +282,12 @@ def main():
 cameras_links = queue.Queue()
 capture_images_q = queue.Queue()
 printing_images_q = queue.Queue()
+
+capture_images_f = queue.Queue()
+printing_images_f = queue.Queue()
+
 sending_images_q = queue.Queue()
+sending_images_f = queue.Queue()
 elegant_shutdown = queue.Queue()
 
 
