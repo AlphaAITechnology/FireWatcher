@@ -110,7 +110,7 @@ def ImageSaving_IO():
             camera_TID, img = printing_images_f.get()
             img_path = f"./saved_images/f_{camera_TID}.webp"
             cv.imwrite(img_path, img)
-            # sending_images_f.put(img_path)
+            sending_images_f.put(img_path)
             
             del img
             del camera_TID
@@ -119,7 +119,7 @@ def ImageSaving_IO():
             camera_TID, img = printing_images_q.get()
             img_path = f"./saved_images/{camera_TID}.webp"
             cv.imwrite(img_path, img)
-            # sending_images_q.put(img_path)
+            sending_images_q.put(img_path)
             
             del img
             del camera_TID
@@ -127,13 +127,11 @@ def ImageSaving_IO():
     elegant_shutdown.put(True)
 
 
-def detect(results, conf, classes):
-    res = results.pandas().xyxy[0]
-    res = res[res["confidence"] >= conf]
-    res[res["class"].isin(classes)]
-    return res if res.size>0 else None
-
-
+# def detect(results, conf, classes):
+#     res = results.pandas().xyxy[0]
+#     res = res[res["confidence"] >= conf]
+#     res[res["class"].isin(classes)]
+#     return res if res.size>0 else None
 
 
 def reduce_numof(l_lists, func):
@@ -203,14 +201,15 @@ def HumanAnalysis():
                     dec_window_list_imgresults.pop(0)
                 
                 if reduce_numof([r for _, r in dec_window_list_imgresults], lambda res: res.shape[0]>0) >= dec_window_approv: # we have 15+ out of 20 positives
-                    overlap_deg = [max([np.add.reduce(roi_mask[int(y2), int(x1):int(x2)].reshape((-1,))) for x1,_,x2,y2 in res_[0].tolist()] if (len(res_)>0 and res_[0].shape[0]>0) else [0]) for _, res_ in dec_window_list_imgresults]
+                    overlap_deg = [max([np.add.reduce(roi_mask[max([int(y2)-1, 0]), int(x1):int(x2)].reshape((-1,))) for x1,_,x2,y2 in res_[0].tolist()] if (len(res_)>0 and res_[0].shape[0]>0) else [0]) for _, res_ in dec_window_list_imgresults]
                     
                     best_img_idx, best_img_val = None, None
                     for bi, bv in enumerate(overlap_deg):
-                        if best_img_val is None:
+                        if ((best_img_val is None) or (best_img_idx is None)):
                             best_img_val = bv
-                            bi = 0
+                            best_img_idx = bi
                             continue
+
                         if (bv > best_img_val):
                             best_img_val = bv
                             best_img_idx = bi
