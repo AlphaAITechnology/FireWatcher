@@ -145,8 +145,7 @@ def reduce_numof(l_lists, func):
 
 def FireAnalysis():
 
-    # model = YOLO("Weights/fire_v8l.pt") #v8l_100 
-    model = YOLO("Weights/yolov8l.pt")
+    model = YOLO("Weights/fire_v8l.pt") #v8l_100
     print("Fire Model Loaded")
     minimum_confidence = 0.4
     dec_window_size=5
@@ -158,7 +157,7 @@ def FireAnalysis():
             while not capture_images_f.empty():
                 camera_TID, img = capture_images_f.get()
                 
-                results = model(img, stream=True, conf=minimum_confidence, classes=[0,2]) # all classes for fire
+                results = model(img, stream=True, conf=minimum_confidence, classes=[0,1]) # all classes for fire
                 results = [result.boxes.xyxy.numpy() for result in results][0]
                 
                 
@@ -274,7 +273,7 @@ def ImageCapture_IO():
                     if ret and (capture_images_q.empty() and capture_images_f.empty()):
                         recover = 0
                         print(f"Sent Successful:\t{count}")
-                        # capture_images_q.put((f"{datetime.datetime.now().isoformat()}@{cameras_id}", frame[:,:,:]))
+                        capture_images_q.put((f"{datetime.datetime.now().isoformat()}@{cameras_id}", frame[:,:,:]))
                         capture_images_f.put((f"{datetime.datetime.now().isoformat()}@{cameras_id}", frame[:,:,:]))
                         del frame
 
@@ -316,13 +315,13 @@ def main():
 
     
     p1 = threading.Thread(target=ImageCapture_IO)
-    # p2 = threading.Thread(target=HumanAnalysis)
+    p2 = threading.Thread(target=HumanAnalysis)
     p3 = threading.Thread(target=ImageSaving_IO)
     p4 = threading.Thread(target=ImageSending_IO)
     p5 = threading.Thread(target=FireAnalysis)
 
     p1.start()
-    # p2.start()
+    p2.start()
     p3.start()
     p4.start()
     p5.start()
