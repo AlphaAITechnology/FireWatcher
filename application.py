@@ -156,7 +156,7 @@ def FireAnalysis():
                 camera_TID, img = capture_images_f.get()
                 
                 results = model(img, stream=True, conf=minimum_confidence, classes=[0,1]) # all classes for fire
-                results = [result.boxes.xyxy.numpy() for result in results][0]
+                results = [result.boxes.xyxy.cpu().numpy() for result in results][0]
                 
                 
                 dec_window_list_results.append(results) ## list of numpy # store image and model results 
@@ -192,7 +192,7 @@ def HumanAnalysis():
             while not capture_images_q.empty():
                 camera_TID, img = capture_images_q.get()
                 results = results = model(img, stream=True, conf=minimum_confidence, classes=[0]) # only person class
-                results = [result.boxes.xyxy.numpy() for result in results]
+                results = [result.boxes.xyxy.cpu().numpy() for result in results]
 
                 
 
@@ -200,6 +200,8 @@ def HumanAnalysis():
                 while(len(dec_window_list_imgresults)>dec_window_size):
                     dec_window_list_imgresults.pop(0)
                 
+
+                #TODO: replace with sum functionality like above
                 if reduce_numof([r for _, r in dec_window_list_imgresults], lambda res: res.shape[0]>0) >= dec_window_approv: # we have 15+ out of 20 positives
                     overlap_deg = [max([np.add.reduce(roi_mask[max([int(y2)-1, 0]), int(x1):int(x2)].reshape((-1,))) for x1,_,x2,y2 in res_[0].tolist()] if (len(res_)>0 and res_[0].shape[0]>0) else [0]) for _, res_ in dec_window_list_imgresults]
                     
