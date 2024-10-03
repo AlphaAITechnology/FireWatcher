@@ -110,7 +110,7 @@ def ImageSaving_IO():
             camera_TID, img = printing_images_f.get()
             img_path = f"./saved_images/f_{camera_TID}.webp"
             cv.imwrite(img_path, img)
-            sending_images_f.put(img_path)
+            # sending_images_f.put(img_path)
             
             del img
             del camera_TID
@@ -119,7 +119,7 @@ def ImageSaving_IO():
             camera_TID, img = printing_images_q.get()
             img_path = f"./saved_images/{camera_TID}.webp"
             cv.imwrite(img_path, img)
-            sending_images_q.put(img_path)
+            # sending_images_q.put(img_path)
             
             del img
             del camera_TID
@@ -194,13 +194,27 @@ def HumanAnalysis():
                 results = results = model(img, stream=True, conf=minimum_confidence, classes=[0]) # only person class
                 results = [result.boxes.xyxy.numpy() for result in results]
 
+                
+
                 dec_window_list_imgresults.append((img, results))
                 while(len(dec_window_list_imgresults)>dec_window_size):
                     dec_window_list_imgresults.pop(0)
                 
                 if reduce_numof([r for _, r in dec_window_list_imgresults], lambda res: res.shape[0]>0) >= dec_window_approv: # we have 15+ out of 20 positives
-                    best_img_idx, best_img_val = max(enumerate([max([np.add.reduce(roi_mask[y2, x1:x2].reshape((-1,))) for x1,_,x2,y2 in [int(r) for r in rlist]]) for _, rlist in dec_window_list_imgresults]), lambda x: x[1])
+                    print("Occur")
+                    overlap_deg = [max([np.add.reduce(roi_mask[int(y2), int(x1):int(x2)].reshape((-1,))) for x1,_,x2,y2 in res_[0].tolist()] if (len(res_)>0 and res_[0].shape[0]>0) else [0]) for _, res_ in dec_window_list_imgresults]
                     
+                    best_img_idx, best_img_val = None, None
+                    for bi, bv in enumerate(overlap_deg):
+                        if best_img_val is None:
+                            best_img_val = bv
+                            bi = 0
+                            continue
+                        if (bv > best_img_val):
+                            best_img_val = bv
+                            best_img_idx = bi
+                    
+                    print(f"Image Overlap Val:\t{best_img_val}, for idx:\t{best_img_idx}")
                     if best_img_val > 0: # make sure that best overlap is actually overlapping because max([0,0]) == 0
                         imgr = dec_window_list_imgresults[best_img_idx][0]
                         printing_images_q.put((camera_TID, imgr))
@@ -260,7 +274,7 @@ def ImageCapture_IO():
                         recover = 0
                         print(f"Sent Successful:\t{count}")
                         capture_images_q.put((f"{datetime.datetime.now().isoformat()}@{cameras_id}", frame[:,:,:]))
-                        capture_images_f.put((f"{datetime.datetime.now().isoformat()}@{cameras_id}", frame[:,:,:]))
+                        # capture_images_f.put((f"{datetime.datetime.now().isoformat()}@{cameras_id}", frame[:,:,:]))
                         del frame
 
 
@@ -304,13 +318,13 @@ def main():
     p2 = threading.Thread(target=HumanAnalysis)
     p3 = threading.Thread(target=ImageSaving_IO)
     p4 = threading.Thread(target=ImageSending_IO)
-    p5 = threading.Thread(target=FireAnalysis)
+    # p5 = threading.Thread(target=FireAnalysis)
 
     p1.start()
     p2.start()
     p3.start()
     p4.start()
-    p5.start()
+    # p5.start()
 
 
 
