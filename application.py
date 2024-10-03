@@ -145,11 +145,12 @@ def reduce_numof(l_lists, func):
 
 def FireAnalysis():
 
-    model = YOLO("Weights/yolov8l_fire.pt") 
+    # model = YOLO("Weights/fire_v8l.pt") #v8l_100 
+    model = YOLO("Weights/yolov8l.pt")
     print("Fire Model Loaded")
     minimum_confidence = 0.4
-    dec_window_size=20
-    dec_window_approv=15
+    dec_window_size=5
+    dec_window_approv=4
     dec_window_list_results=[]
 
     while elegant_shutdown.empty():
@@ -157,14 +158,16 @@ def FireAnalysis():
             while not capture_images_f.empty():
                 camera_TID, img = capture_images_f.get()
                 
-                results = model(img, stream=True, conf=minimum_confidence) # all classes for fire
-                results = [result.boxes.xyxy.numpy() for result in results]
+                results = model(img, stream=True, conf=minimum_confidence, classes=[0,2]) # all classes for fire
+                results = [result.boxes.xyxy.numpy() for result in results][0]
                 
-                dec_window_list_results.append(results) # store image and model results
+                
+                dec_window_list_results.append(results) ## list of numpy # store image and model results 
                 while (len(dec_window_list_results)>dec_window_size): # only stores static number of images
                     dec_window_list_results.pop(0) # remove oldest image
 
-                if reduce_numof(dec_window_list_results, lambda res: res.shape[0]>0) >= dec_window_approv: # we have 15+ out of 20 positives
+
+                if sum([(1 if res.shape[0]>0 else 0) for res in dec_window_list_results]) >= dec_window_approv: # we have 15+ out of 20 positives
                     printing_images_f.put((camera_TID, img))
                     dec_window_list_results.clear()
                 
@@ -201,7 +204,6 @@ def HumanAnalysis():
                     dec_window_list_imgresults.pop(0)
                 
                 if reduce_numof([r for _, r in dec_window_list_imgresults], lambda res: res.shape[0]>0) >= dec_window_approv: # we have 15+ out of 20 positives
-                    print("Occur")
                     overlap_deg = [max([np.add.reduce(roi_mask[int(y2), int(x1):int(x2)].reshape((-1,))) for x1,_,x2,y2 in res_[0].tolist()] if (len(res_)>0 and res_[0].shape[0]>0) else [0]) for _, res_ in dec_window_list_imgresults]
                     
                     best_img_idx, best_img_val = None, None
@@ -214,7 +216,6 @@ def HumanAnalysis():
                             best_img_val = bv
                             best_img_idx = bi
                     
-                    print(f"Image Overlap Val:\t{best_img_val}, for idx:\t{best_img_idx}")
                     if best_img_val > 0: # make sure that best overlap is actually overlapping because max([0,0]) == 0
                         imgr = dec_window_list_imgresults[best_img_idx][0]
                         printing_images_q.put((camera_TID, imgr))
@@ -273,8 +274,8 @@ def ImageCapture_IO():
                     if ret and (capture_images_q.empty() and capture_images_f.empty()):
                         recover = 0
                         print(f"Sent Successful:\t{count}")
-                        capture_images_q.put((f"{datetime.datetime.now().isoformat()}@{cameras_id}", frame[:,:,:]))
-                        # capture_images_f.put((f"{datetime.datetime.now().isoformat()}@{cameras_id}", frame[:,:,:]))
+                        # capture_images_q.put((f"{datetime.datetime.now().isoformat()}@{cameras_id}", frame[:,:,:]))
+                        capture_images_f.put((f"{datetime.datetime.now().isoformat()}@{cameras_id}", frame[:,:,:]))
                         del frame
 
 
@@ -315,16 +316,16 @@ def main():
 
     
     p1 = threading.Thread(target=ImageCapture_IO)
-    p2 = threading.Thread(target=HumanAnalysis)
+    # p2 = threading.Thread(target=HumanAnalysis)
     p3 = threading.Thread(target=ImageSaving_IO)
     p4 = threading.Thread(target=ImageSending_IO)
-    # p5 = threading.Thread(target=FireAnalysis)
+    p5 = threading.Thread(target=FireAnalysis)
 
     p1.start()
-    p2.start()
+    # p2.start()
     p3.start()
     p4.start()
-    # p5.start()
+    p5.start()
 
 
 
