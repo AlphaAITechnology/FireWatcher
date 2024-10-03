@@ -177,27 +177,34 @@ def FireAnalysis():
 
 
 def HumanAnalysis():
-    model = torch.hub.load("ultralytics/yolov5", "yolov5s")
+    model = YOLO("Weights/yolov8l.pt") 
     print("Human Model Loaded")
     with gzip.open("./FloorMask.csv.gz") as mask_gz:
         roi_mask = np.loadtxt(mask_gz, delimiter=',').astype(np.uint64)
 
     minimum_confidence = 0.4
+    dec_window_size=6
+    dec_window_approv=4
+    dec_window_list_imgresults=[]
 
     while elegant_shutdown.empty():
         try:
             while not capture_images_q.empty():
                 camera_TID, img = capture_images_q.get()
-                results = model(img)
-                results = detect(results, minimum_confidence, [0])
+                results = results = model(img, stream=True, conf=minimum_confidence, classes=[0]) # only person class
+                results = [result.boxes.xyxy.numpy() for result in results]
 
-                if results is not None:
-                    results_np = results[["xmin", "ymin", "xmax", "ymax"]].to_numpy().tolist()
+                dec_window_list_imgresults.append((img, results))
+                while(len(dec_window_list_imgresults)>dec_window_size):
+                    dec_window_list_imgresults.pop(0)
+                
+                if reduce_numof([r for _, r in dec_window_list_imgresults], lambda res: res.shape[0]>0) >= dec_window_approv: # we have 15+ out of 20 positives
+                    best_img_idx, best_img_val = max(enumerate([max([np.add.reduce(roi_mask[y2, x1:x2].reshape((-1,))) for x1,_,x2,y2 in [int(r) for r in rlist]]) for _, rlist in dec_window_list_imgresults]), lambda x: x[1])
                     
-                    for x_min, _, x_max, y_max in results_np:
-                        if np.add.reduce(roi_mask[int(y_max), int(x_min):int(x_max)].reshape((-1,))) > 0:
-                            printing_images_q.put((camera_TID, img))
-                            break
+                    if best_img_val > 0: # make sure that best overlap is actually overlapping because max([0,0]) == 0
+                        imgr = dec_window_list_imgresults[best_img_idx][0]
+                        printing_images_q.put((camera_TID, imgr))
+                        dec_window_list_imgresults.clear()
                         
                 del img
                 del camera_TID
