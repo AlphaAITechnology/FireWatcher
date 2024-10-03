@@ -9,7 +9,7 @@ import queue
 import requests as req
 import threading
 import time
-import torch
+from ultralytics import YOLO
 
 
 def ImageSending_IO():
@@ -134,21 +134,40 @@ def detect(results, conf, classes):
     return res if res.size>0 else None
 
 
+
+
+def reduce_numof(l_lists, func):
+    res = 0
+    for l_list in l_lists:
+        res += 1 if sum([1 if func(il) else 0 for il in l_list])>0 else 0
+    return res
+
+
 def FireAnalysis():
-    model = torch.hub.load("ultralytics/yolov5", 'custom', "./Weights/FireDetection.pt")
+
+    model = YOLO("Weights/yolov8l_fire.pt") 
     print("Fire Model Loaded")
     minimum_confidence = 0.4
+    dec_window_size=20
+    dec_window_approv=15
+    dec_window_list_results=[]
 
     while elegant_shutdown.empty():
         try:
             while not capture_images_f.empty():
                 camera_TID, img = capture_images_f.get()
-                results = model(img)
-                results = detect(results, minimum_confidence, [0, 1])
+                
+                results = model(img, stream=True, conf=minimum_confidence) # all classes for fire
+                results = [result.boxes.xyxy.numpy() for result in results]
+                
+                dec_window_list_results.append(results) # store image and model results
+                while (len(dec_window_list_results)>dec_window_size): # only stores static number of images
+                    dec_window_list_results.pop(0) # remove oldest image
 
-                if results is not None:
+                if reduce_numof(dec_window_list_results, lambda res: res.shape[0]>0) >= dec_window_approv: # we have 15+ out of 20 positives
                     printing_images_f.put((camera_TID, img))
-                        
+                    dec_window_list_results.clear()
+                
                 del img
                 del camera_TID
         except Exception as e:
@@ -186,6 +205,10 @@ def HumanAnalysis():
             print(e)
             elegant_shutdown.put(True)
     elegant_shutdown.put(True)
+
+
+
+
 
 
 def ImageCapture_IO():
@@ -232,6 +255,8 @@ def ImageCapture_IO():
                         capture_images_q.put((f"{datetime.datetime.now().isoformat()}@{cameras_id}", frame[:,:,:]))
                         capture_images_f.put((f"{datetime.datetime.now().isoformat()}@{cameras_id}", frame[:,:,:]))
                         del frame
+
+
 
                 time.sleep(1/fpso)
         except Exception as e:
