@@ -201,22 +201,14 @@ def HumanAnalysis():
 
                 # greater than 0 if overlap exits
                 if sum([1 if i>0 else 0 for _, i in dec_window_list_imgresults]) >= dec_window_approv:
-                    
-                    best_img_idx, best_img_val = None, None
-                    for bi, bv in enumerate([r for _, r in dec_window_list_imgresults]):
-                        if ((best_img_val is None) or (best_img_idx is None)):
-                            best_img_val = bv
-                            best_img_idx = bi
-                            continue
-
-                        if (bv > best_img_val):
-                            best_img_val = bv
-                            best_img_idx = bi
-                    
-                    if best_img_val > 0: # make sure that best overlap is actually overlapping because max([0,0]) == 0
-                        imgr = dec_window_list_imgresults[best_img_idx][0]
-                        printing_images_q.put((camera_TID, imgr))
-                        dec_window_list_imgresults.clear()
+                    # Find largest overlap
+                    best_val = max(dec_window_list_imgresults, key=lambda x: x[1])
+                    # Use image from largest overlap
+                    imgr = [img for img, bval in dec_window_list_imgresults if bval == best_val][0]
+                    # Send image for printing
+                    printing_images_q.put((camera_TID, imgr))
+                    # Reset list
+                    dec_window_list_imgresults.clear()
                         
                 del img
                 del camera_TID
