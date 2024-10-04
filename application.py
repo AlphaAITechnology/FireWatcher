@@ -178,8 +178,8 @@ def HumanAnalysis():
         roi_mask = np.loadtxt(mask_gz, delimiter=',').astype(np.uint64)
 
     minimum_confidence = 0.6
-    dec_window_size=6
-    dec_window_approv=4
+    dec_window_size=15
+    dec_window_approv=8
     dec_window_list_imgresults=[]
 
     while elegant_shutdown.empty():
@@ -196,8 +196,9 @@ def HumanAnalysis():
                     dec_window_list_imgresults.pop(0)
                 
 
-                if sum([(1 if sum([(1 if r[0].shape[0]>0 else 0) if len(r)>0 else 0 for r in res])>0 else 0) for _, res in dec_window_list_imgresults])>=dec_window_approv: # we have 15+ out of 20 positives
-                    overlap_deg = [max([np.add.reduce(roi_mask[max([int(y2)-1, 0]), int(x1):int(x2)].reshape((-1,))) for x1,_,x2,y2 in res_[0].tolist()] if (len(res_)>0 and res_[0].shape[0]>0) else [0]) for _, res_ in dec_window_list_imgresults]
+                # greater than 0 if overlap exits
+                overlap_deg = [max([np.add.reduce(roi_mask[max([int(y2)-1, 0]), int(x1):int(x2)].reshape((-1,))) for x1,_,x2,y2 in res_[0].tolist()] if (len(res_)>0 and res_[0].shape[0]>0) else [0]) for _, res_ in dec_window_list_imgresults]
+                if sum([1 if i>0 else 0 for i in overlap_deg]) >= dec_window_approv:
                     
                     best_img_idx, best_img_val = None, None
                     for bi, bv in enumerate(overlap_deg):
