@@ -134,19 +134,13 @@ def ImageSaving_IO():
 #     return res if res.size>0 else None
 
 
-def reduce_numof(l_lists, func):
-    res = 0
-    for l_list in l_lists:
-        res += 1 if sum([1 if func(il) else 0 for il in l_list])>0 else 0
-    return res
-
 
 def FireAnalysis():
 
     model = YOLO("Weights/fire_v8l.pt") #v8l_100
     print("Fire Model Loaded")
     minimum_confidence = 0.4
-    dec_window_size=5
+    dec_window_size=6
     dec_window_approv=4
     dec_window_list_results=[]
 
@@ -201,8 +195,7 @@ def HumanAnalysis():
                     dec_window_list_imgresults.pop(0)
                 
 
-                #TODO: replace with sum functionality like above
-                if reduce_numof([r for _, r in dec_window_list_imgresults], lambda res: res.shape[0]>0) >= dec_window_approv: # we have 15+ out of 20 positives
+                if sum([(1 if sum([(1 if r[0].shape[0]>0 else 0) if len(r)>0 else 0 for r in res])>0 else 0) for _, res in dec_window_list_imgresults])>=dec_window_approv: # we have 15+ out of 20 positives
                     overlap_deg = [max([np.add.reduce(roi_mask[max([int(y2)-1, 0]), int(x1):int(x2)].reshape((-1,))) for x1,_,x2,y2 in res_[0].tolist()] if (len(res_)>0 and res_[0].shape[0]>0) else [0]) for _, res_ in dec_window_list_imgresults]
                     
                     best_img_idx, best_img_val = None, None
