@@ -150,7 +150,7 @@ def FireAnalysis():
             while not capture_images_f.empty():
                 camera_TID, img = capture_images_f.get()
                 
-                results = model(img, stream=True, conf=minimum_confidence, classes=[0,1]) # all classes for fire
+                results = model(img, stream=True, conf=minimum_confidence, classes=[1]) # all classes for fire 0: smoke, 1: fire
                 results = [result.boxes.xyxy.cpu().numpy() for result in results][0]
                 
                 
@@ -177,7 +177,7 @@ def HumanAnalysis():
     with gzip.open("./FloorMask.csv.gz") as mask_gz:
         roi_mask = np.loadtxt(mask_gz, delimiter=',').astype(np.uint64)
 
-    minimum_confidence = 0.4
+    minimum_confidence = 0.6
     dec_window_size=6
     dec_window_approv=4
     dec_window_list_imgresults=[]
