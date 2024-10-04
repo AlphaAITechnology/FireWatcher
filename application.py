@@ -1,3 +1,4 @@
+from ultralytics import YOLO
 import argparse
 import cv2 as cv
 import datetime
@@ -9,7 +10,7 @@ import queue
 import requests as req
 import threading
 import time
-from ultralytics import YOLO
+
 
 
 def ImageSending_IO():
