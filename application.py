@@ -151,7 +151,7 @@ def FireAnalysis():
                 camera_TID, img = capture_images_f.get()
                 
                 results = model(img, stream=True, conf=minimum_confidence, classes=[1]) # all classes for fire 0: smoke, 1: fire
-                results = [result.boxes.xyxy.cpu().numpy() for result in results][0]
+                results = [np.floor(result.boxes.xyxy.cpu().numpy()) for result in results][0]
                 
                 
                 dec_window_list_results.append(results) ## list of numpy # store image and model results 
@@ -186,22 +186,23 @@ def HumanAnalysis():
         try:
             while not capture_images_q.empty():
                 camera_TID, img = capture_images_q.get()
-                results = results = model(img, stream=True, conf=minimum_confidence, classes=[0]) # only person class
-                results = [result.boxes.xyxy.cpu().numpy() for result in results]
+                results = model(img, stream=True, conf=minimum_confidence, classes=[0]) # only person class
+                results = [np.floor(result.boxes.xyxy.cpu().numpy()) for result in results] # bring to xyxy numpy
+                results = [max([np.add.reduce(roi_mask[max([int(y2)-1, 0]), int(x1):int(x2)].reshape((-1,))) for x1, _, x2, y2 in result.tolist()]) for result in results] # get max roi intersection of each detection
+                results = max(results) if len(results)>1 else (results[0] if len(results)==1 else 0) # find max roi intersection for this image
 
                 
 
-                dec_window_list_imgresults.append((img, results))
+                dec_window_list_imgresults.append((img, results)) # tuple of (ndarray, int)
                 while(len(dec_window_list_imgresults)>dec_window_size):
                     dec_window_list_imgresults.pop(0)
                 
 
                 # greater than 0 if overlap exits
-                overlap_deg = [max([np.add.reduce(roi_mask[max([int(y2)-1, 0]), int(x1):int(x2)].reshape((-1,))) for x1,_,x2,y2 in res_[0].tolist()] if (len(res_)>0 and res_[0].shape[0]>0) else [0]) for _, res_ in dec_window_list_imgresults]
-                if sum([1 if i>0 else 0 for i in overlap_deg]) >= dec_window_approv:
+                if sum([1 if i>0 else 0 for _, i in dec_window_list_imgresults]) >= dec_window_approv:
                     
                     best_img_idx, best_img_val = None, None
-                    for bi, bv in enumerate(overlap_deg):
+                    for bi, bv in enumerate([r for _, r in dec_window_list_imgresults]):
                         if ((best_img_val is None) or (best_img_idx is None)):
                             best_img_val = bv
                             best_img_idx = bi
