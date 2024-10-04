@@ -188,7 +188,8 @@ def HumanAnalysis():
                 camera_TID, img = capture_images_q.get()
                 results = model(img, stream=True, conf=minimum_confidence, classes=[0]) # only person class
                 results = [np.floor(result.boxes.xyxy.cpu().numpy()) for result in results] # bring to xyxy numpy
-                results = [max([np.add.reduce(roi_mask[max([int(y2)-1, 0]), int(x1):int(x2)].reshape((-1,))) for x1, _, x2, y2 in result.tolist()]) for result in results] # get max roi intersection of each detection
+                
+                results = [(max([np.add.reduce(roi_mask[max([int(y2)-1, 0]), int(x1):int(x2)].reshape((-1,))) for x1, _, x2, y2 in result.tolist()]) if result.shape[0]>0 else 0) for result in results] # get max roi intersection of each detection
                 results = max(results) if len(results)>1 else (results[0] if len(results)==1 else 0) # find max roi intersection for this image
 
                 
