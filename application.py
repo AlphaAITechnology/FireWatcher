@@ -128,13 +128,6 @@ def ImageSaving_IO():
     elegant_shutdown.put(True)
 
 
-# def detect(results, conf, classes):
-#     res = results.pandas().xyxy[0]
-#     res = res[res["confidence"] >= conf]
-#     res[res["class"].isin(classes)]
-#     return res if res.size>0 else None
-
-
 
 def FireAnalysis():
 
