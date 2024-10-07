@@ -172,7 +172,7 @@ def HumanAnalysis():
 
     minimum_confidence = 0.6
     dec_window_size=15
-    dec_window_approv=8
+    dec_window_approv=8 # Must be greater than zero
     dec_window_list_imgresults=[]
 
     while elegant_shutdown.empty():
@@ -187,7 +187,7 @@ def HumanAnalysis():
 
                 
 
-                dec_window_list_imgresults.append((img, results)) # tuple of (ndarray, int)
+                dec_window_list_imgresults.append((img if results > 0 else None, results)) # tuple of (ndarray, int)
                 while(len(dec_window_list_imgresults)>dec_window_size):
                     dec_window_list_imgresults.pop(0)
                 
