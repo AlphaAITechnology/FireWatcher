@@ -282,19 +282,21 @@ def main():
     args = parser.parse_args()
 
     cameras = None
-    if (args.rtsp is None):
+    if (args.env_camera is not None):
         with open("./.env.json", 'r') as env_file:
             jdata = json.load(env_file)
             cameras = jdata["cameras"] if "cameras" in jdata else []
         cameras_links.put(cameras[args.env_camera])
-    if (not ((args.rtsp is None) or (args.uuid is None))):
-        cameras_links.put({
-                "uid": args.uuid,
-                "link": args.rtsp
-            })
+
     else:
-        print("--rtsp or --uuid cannot be empty")
-        exit()
+        if (not ((args.rtsp is None) or (args.uuid is None))):
+            cameras_links.put({
+                    "uid": args.uuid,
+                    "link": args.rtsp
+                })
+        else:
+            print("--rtsp or --uuid cannot be empty")
+            exit()
     
 
     
