@@ -182,26 +182,27 @@ def HumanAnalysis():
                 results = model(img, stream=True, conf=minimum_confidence, classes=[0]) # only person class
                 results = [np.floor(result.boxes.xyxy.cpu().numpy()) for result in results] # bring to xyxy numpy
                 
-                results = [(max([np.add.reduce(roi_mask[max([int(y2)-1, 0]), int(x1):int(x2)].reshape((-1,))) for x1, _, x2, y2 in result.tolist()]) if result.shape[0]>0 else 0) for result in results] # get max roi intersection of each detection
-                results = max(results) if len(results)>1 else (results[0] if len(results)==1 else 0) # find max roi intersection for this image
+                # get max roi intersection of each detection
+                results = [(max([np.add.reduce(roi_mask[max([int(y2)-1, 0]), int(x1):int(x2)].reshape((-1,))) for x1, _, x2, y2 in result.tolist()]) if result.shape[0]>0 else 0) for result in results] 
+                # find max roi intersection for this image
+                results = max(results) if len(results)>1 else (results[0] if len(results)==1 else 0)
 
+                # list of tuples of (optional(ndarray), int)
+                dec_window_list_imgresults.append((img if results > 0 else None, results)) 
                 
-
-                dec_window_list_imgresults.append((img if results > 0 else None, results)) # tuple of (ndarray, int)
+                # remove older data if excess
                 while(len(dec_window_list_imgresults)>dec_window_size):
                     dec_window_list_imgresults.pop(0)
                 
-
                 # greater than 0 if overlap exits
                 if sum([1 if i>0 else 0 for _, i in dec_window_list_imgresults]) >= dec_window_approv:
-                    # Find largest overlap
-                    best_val = max(dec_window_list_imgresults, key=lambda x: x[1])
-                    # Use image from largest overlap
-                    imgr = [img for img, bval in dec_window_list_imgresults if bval == best_val][0]
+                    # Find image with the largest overlap with ROI
+                    imgr, _ = max(dec_window_list_imgresults, key=lambda x: x[1])
                     # Send image for printing
-                    printing_images_q.put((camera_TID, imgr))
-                    # Reset list
-                    dec_window_list_imgresults.clear()
+                    if imgr is not None: # safety --> will only be an issue if `dec_window_approv==0`
+                        printing_images_q.put((camera_TID, imgr)) 
+                        # Reset list
+                        dec_window_list_imgresults.clear()
                         
                 del img
                 del camera_TID
@@ -291,6 +292,9 @@ def main():
                 "uid": args.uuid,
                 "link": args.rtsp
             })
+    else:
+        print("--rtsp or --uuid cannot be empty")
+        exit()
     
 
     
@@ -325,4 +329,4 @@ elegant_shutdown = queue.Queue()
 
 if __name__ == "__main__":
     main()
-    # elegant_shutdown.put(True)
+
