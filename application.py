@@ -174,6 +174,7 @@ def HumanAnalysis():
     dec_window_size=15
     dec_window_approv=8 # Must be greater than zero
     dec_window_list_imgresults=[]
+    has_seen = False
 
     while elegant_shutdown.empty():
         try:
@@ -185,24 +186,33 @@ def HumanAnalysis():
                 # get max roi intersection of each detection
                 results = [(max([np.add.reduce(roi_mask[max([int(y2)-1, 0]), int(x1):int(x2)].reshape((-1,))) for x1, _, x2, y2 in result.tolist()]) if result.shape[0]>0 else 0) for result in results] 
                 # find max roi intersection for this image
-                results = max(results) if len(results)>1 else (results[0] if len(results)==1 else 0)
+                results = max(results) if len(results)>0 else 0
 
                 # list of tuples of (optional(ndarray), int)
                 dec_window_list_imgresults.append((img if results > 0 else None, results)) 
                 
+                
+
+                if has_seen: # if an old detection has been sent
+                    if sum([i for _, i in dec_window_list_imgresults[-3:]])==0: # no detections triggered in last 3 frames
+                        dec_window_list_imgresults = dec_window_list_imgresults[-3:] # start afresh; keeping last 3 frames
+                        has_seen = False
+                
                 # remove older data if excess
                 while(len(dec_window_list_imgresults)>dec_window_size):
                     dec_window_list_imgresults.pop(0)
+                    
                 
-                # greater than 0 if overlap exits
-                if sum([1 if i>0 else 0 for _, i in dec_window_list_imgresults]) >= dec_window_approv:
-                    # Find image with the largest overlap with ROI
-                    imgr, _ = max(dec_window_list_imgresults, key=lambda x: x[1])
-                    # Send image for printing
-                    if imgr is not None: # safety --> will only be an issue if `dec_window_approv==0`
-                        printing_images_q.put((camera_TID, imgr)) 
-                        # Reset list
-                        dec_window_list_imgresults.clear()
+                if not has_seen: # only trigger sending mechanism if old detection is not ongoing
+                    # greater than 0 if overlap exits
+                    if sum([1 if i>0 else 0 for _, i in dec_window_list_imgresults]) >= dec_window_approv:
+                        # Find image with the largest overlap with ROI
+                        imgr, _ = max(dec_window_list_imgresults, key=lambda x: x[1])
+                        # Send image for printing
+                        if imgr is not None: # safety --> will only be an issue if `dec_window_approv==0`
+                            printing_images_q.put((camera_TID, imgr)) 
+                            has_seen = True
+                        
                         
                 del img
                 del camera_TID
