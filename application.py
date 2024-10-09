@@ -27,7 +27,8 @@ def ImageSending_IO():
         # Handle Fire Detection 
         while(not sending_images_f.empty()):
             img_path = sending_images_f.get()
-            camera_id = os.path.basename(img_path).split('@')[1].split('.')[0]
+            camera_tstamp, camera_id = os.path.basename(img_path).split('@')
+            camera_id = camera_id.split('.')[0]
 
             with open(img_path, "rb") as files_:
                 # storing file
@@ -44,7 +45,8 @@ def ImageSending_IO():
                         data={
                             "url": upload_response["fileUrl"],
                             "type": "FIRE",
-                            "cameraId": camera_id
+                            "cameraId": camera_id,
+                            "alertAt": camera_tstamp
                         }
                     )
                 
@@ -79,7 +81,8 @@ def ImageSending_IO():
                         data={
                             "url": upload_response["fileUrl"],
                             "type": "PERSON",
-                            "cameraId": camera_id
+                            "cameraId": camera_id,
+                            "alertAt": camera_tstamp
                         }
                     )
                 
@@ -152,7 +155,7 @@ def FireAnalysis():
                     dec_window_list_results.pop(0) # remove oldest image
 
 
-                if sum([(1 if res.shape[0]>0 else 0) for res in dec_window_list_results]) >= dec_window_approv: # we have 15+ out of 20 positives
+                if sum([(1 if res.shape[0]>0 else 0) for res in dec_window_list_results]) >= dec_window_approv: # we have 5+ out of 50 positives
                     printing_images_f.put((camera_TID, img))
                     dec_window_list_results.clear()
                 
