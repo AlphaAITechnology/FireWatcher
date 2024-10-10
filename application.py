@@ -2,6 +2,7 @@ from ultralytics import YOLO
 import argparse
 import cv2 as cv
 import datetime
+import pytz
 import gzip
 import json
 import numpy as np
@@ -268,11 +269,13 @@ def ImageCapture_IO():
                     if (not ret):
                         raise ValueError("Retrieve Failure")
 
+
                     if ret and (capture_images_q.empty() and capture_images_f.empty()):
                         recover = 0
+                        dtm_ = datetime.datetime.now(pytz.utc).isoformat().split('+')[0]
                         print(f"Sent Successful:\t{count}")
-                        capture_images_q.put((f"{datetime.datetime.now().isoformat()}@{cameras_id}", frame[:,:,:]))
-                        capture_images_f.put((f"{datetime.datetime.now().isoformat()}@{cameras_id}", frame[:,:,:]))
+                        capture_images_q.put((f"{dtm_}@{cameras_id}", frame[:,:,:]))
+                        capture_images_f.put((f"{dtm_}@{cameras_id}", frame[:,:,:]))
                         del frame
 
 
