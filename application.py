@@ -58,13 +58,14 @@ def ImageSending_IO():
                 print("File Upload Unsucessful:\t", file_upload_response.status_code)
 
             # Delete image from disks
-            # os.remove(img_path) ## --> TODO: Exists for debugging
+            os.remove(img_path) ## --> TODO: Exists for debugging
             del img_path
 
         # Handle Human Detection 
         while(not sending_images_q.empty()):
             img_path = sending_images_q.get()
-            camera_id = os.path.basename(img_path).split('@')[1].split('.')[0]
+            camera_tstamp, camera_id = os.path.basename(img_path).split('@')
+            camera_id = camera_id.split('.')[0]
 
             with open(img_path, "rb") as files_:
                 # storing file
@@ -94,7 +95,7 @@ def ImageSending_IO():
                 print("File Upload Unsucessful:\t", file_upload_response.status_code)
 
             # Delete image from disks
-            # os.remove(img_path) ## --> TODO: Exists for debugging
+            os.remove(img_path) ## --> TODO: Exists for debugging
             del img_path
 
     elegant_shutdown.put(True)
@@ -287,7 +288,6 @@ def ImageCapture_IO():
 
 
 def main():
-
     parser = argparse.ArgumentParser(description='Watch Cameras for Humans')
     parser.add_argument('--rtsp', type=str, help='rtsp link for camera', default=None)
     parser.add_argument('--uuid', type=str, help='rtsp link for camera', default=None)
@@ -310,8 +310,6 @@ def main():
         else:
             print("--rtsp or --uuid cannot be empty")
             exit()
-    
-
     
     
 
