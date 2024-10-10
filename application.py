@@ -58,7 +58,7 @@ def ImageSending_IO():
                 print("File Upload Unsucessful:\t", file_upload_response.status_code)
 
             # Delete image from disks
-            os.remove(img_path) ## --> TODO: Exists for debugging
+            # os.remove(img_path) ## --> TODO: Exists for debugging
             del img_path
 
         # Handle Human Detection 
@@ -94,7 +94,7 @@ def ImageSending_IO():
                 print("File Upload Unsucessful:\t", file_upload_response.status_code)
 
             # Delete image from disks
-            os.remove(img_path) ## --> TODO: Exists for debugging
+            # os.remove(img_path) ## --> TODO: Exists for debugging
             del img_path
 
     elegant_shutdown.put(True)
