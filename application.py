@@ -29,6 +29,7 @@ def ImageSending_IO():
         while(not sending_images_f.empty()):
             img_path = sending_images_f.get()
             camera_tstamp, camera_id = os.path.basename(img_path).split('@')
+            camera_tstamp = camera_tstamp.split('_')[1]
             camera_id = camera_id.split('.')[0]
 
             with open(img_path, "rb") as files_:
