@@ -195,7 +195,7 @@ def HumanAnalysis():
         try:
             while not capture_images_q.empty():
                 camera_TID, img = capture_images_q.get()
-                results = model(img, stream=True, conf=minimum_confidence, classes=[0], device='cuda:1', name="HUMAN_LOGS", project="LOGS") # only person class
+                results = model(img, stream=True, conf=minimum_confidence, classes=[0], device='cuda:1', name="HUMAN_LOGS", project="LOGS", save=True, show_boxes=False, save_txt=True) # only person class
                 results = [np.floor(result.boxes.xyxy.cpu().numpy()) for result in results] # bring to xyxy numpy
                 
                 # get max roi intersection of each detection
