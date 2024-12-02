@@ -141,7 +141,7 @@ def FireAnalysis():
 
     model = YOLO("Weights/fire_v8l.pt")
     print("Fire Model Loaded")
-    minimum_confidence = 0.6
+    minimum_confidence = 0.55
     dec_window_size=25
     dec_window_approv=22
     dec_window_list_results=[]
