@@ -205,7 +205,7 @@ def HumanAnalysis():
                 if (len(save_annotations)>0): #annotations to save exists
                     with open(f"LOGS/HUMAN/{annotation_counter:0>8}.txt", 'w') as lf:
                         for coors in save_annotations:
-                            lf.writelines(coors)
+                            lf.write(json.dumps(coors))
                     cv.imwrite(f"LOGS/HUMAN/{annotation_counter:0>8}.webm", img)
                     annotation_counter+=1
                 #! End Saving Image with label
