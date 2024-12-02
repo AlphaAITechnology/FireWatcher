@@ -142,9 +142,10 @@ def FireAnalysis():
     model = YOLO("Weights/fire_v8l.pt")
     print("Fire Model Loaded")
     minimum_confidence = 0.6
-    dec_window_size=50
-    dec_window_approv=5
+    dec_window_size=25
+    dec_window_approv=22
     dec_window_list_results=[]
+    seen_before = False
 
     while elegant_shutdown.empty():
         try:
@@ -160,9 +161,12 @@ def FireAnalysis():
                     dec_window_list_results.pop(0) # remove oldest image
 
 
-                if sum([(1 if res.shape[0]>0 else 0) for res in dec_window_list_results]) >= dec_window_approv: # we have 5+ out of 50 positives
+                if (not seen_before) and (sum([(1 if res.shape[0]>0 else 0) for res in dec_window_list_results]) >= dec_window_approv): # we have 5+ out of 50 positives
                     printing_images_f.put((camera_TID, img))
-                    dec_window_list_results.clear()
+                    # dec_window_list_results.clear()
+                    seen_before = True
+                elif (seen_before) and (sum([(1 if res.shape[0]>0 else 0) for res in dec_window_list_results]) < dec_window_approv):
+                    seen_before = False
                 
                 del img
                 del camera_TID
