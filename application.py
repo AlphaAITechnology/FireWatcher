@@ -206,7 +206,7 @@ def HumanAnalysis():
                     with open(f"LOGS/HUMAN/{annotation_counter:0>8}.txt", 'w') as lf:
                         for coors in save_annotations:
                             lf.write(json.dumps(coors))
-                    cv.imwrite(f"LOGS/HUMAN/{annotation_counter:0>8}.webm", img)
+                    cv.imwrite(f"LOGS/HUMAN/{annotation_counter:0>8}.webp", img)
                     annotation_counter+=1
                 #! End Saving Image with label
                 
