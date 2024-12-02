@@ -191,12 +191,24 @@ def HumanAnalysis():
     dec_window_list_imgresults=[]
     has_seen = False
 
+    annotation_counter = 0
+
     while elegant_shutdown.empty():
         try:
             while not capture_images_q.empty():
                 camera_TID, img = capture_images_q.get()
-                results = model(img, stream=True, conf=minimum_confidence, classes=[0], device='cuda:1', name="HUMAN_LOGS", project="LOGS", save=True, show_boxes=False, save_txt=True) # only person class
+                results = model(img, stream=True, conf=minimum_confidence, classes=[0], device='cuda:1') # only person class
                 results = [np.floor(result.boxes.xyxy.cpu().numpy()) for result in results] # bring to xyxy numpy
+
+                #! Save image with label
+                save_annotations = [result.tolist() for result in results if result.shape[0]>0]
+                if (len(save_annotations)>0): #annotations to save exists
+                    with open(f"LOGS/HUMAN/{annotation_counter:0>8}.txt", 'r') as lf:
+                        for coors in save_annotations:
+                            lf.writelines(coors)
+                    cv.imwrite(f"LOGS/HUMAN/{annotation_counter:0>8}.webm", img)
+                    annotation_counter+=1
+                #! End Saving Image with label
                 
                 # get max roi intersection of each detection
                 results = [(max([np.add.reduce(roi_mask[max([int(y2)-1, 0]), int(x1):int(x2)].reshape((-1,))) for x1, _, x2, y2 in result.tolist()]) if result.shape[0]>0 else 0) for result in results] 
@@ -304,6 +316,11 @@ def ImageCapture_IO():
 
 
 def main():
+    os.mkdir("./LOGS/")
+    os.mkdir("./LOGS/HUMAN/")
+    os.mkdir("./LOGS/FIRE/")
+
+
     parser = argparse.ArgumentParser(description='Watch Cameras for Humans')
     parser.add_argument('--rtsp', type=str, help='rtsp link for camera', default=None)
     parser.add_argument('--fpath', type=str, help='rtsp link for camera', default=None)
