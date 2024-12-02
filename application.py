@@ -117,7 +117,7 @@ def ImageSaving_IO():
             camera_TID, img = printing_images_f.get()
             img_path = f"./saved_images/f_{camera_TID}.webp"
             cv.imwrite(img_path, img)
-            sending_images_f.put(img_path)
+            # sending_images_f.put(img_path)
             
             del img
             del camera_TID
@@ -126,7 +126,7 @@ def ImageSaving_IO():
             camera_TID, img = printing_images_q.get()
             img_path = f"./saved_images/{camera_TID}.webp"
             cv.imwrite(img_path, img)
-            sending_images_q.put(img_path)
+            # sending_images_q.put(img_path)
             
             del img
             del camera_TID
