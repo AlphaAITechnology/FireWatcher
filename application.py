@@ -117,6 +117,7 @@ def ImageSaving_IO():
             camera_TID, img = printing_images_f.get()
             img_path = f"./saved_images/f_{camera_TID}.webp"
             cv.imwrite(img_path, img)
+            cv.imwrite(f"./saved_images/LOGGING_FIRE_{camera_TID}.webp", img)
             sending_images_f.put(img_path)
             
             del img
@@ -126,6 +127,7 @@ def ImageSaving_IO():
             camera_TID, img = printing_images_q.get()
             img_path = f"./saved_images/{camera_TID}.webp"
             cv.imwrite(img_path, img)
+            cv.imwrite(f"./saved_images/LOGGING_HUMAN_{camera_TID}.webp", img)
             sending_images_q.put(img_path)
             
             del img
@@ -346,4 +348,6 @@ elegant_shutdown = queue.Queue()
 
 if __name__ == "__main__":
     main()
+
+
 
