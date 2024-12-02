@@ -316,9 +316,12 @@ def ImageCapture_IO():
 
 
 def main():
-    os.mkdir("./LOGS/")
-    os.mkdir("./LOGS/HUMAN/")
-    os.mkdir("./LOGS/FIRE/")
+    if not(os.path.exists("./LOGS/") and os.path.isdir("./LOGS/")):
+        os.mkdir("./LOGS/")
+    if not(os.path.exists("./LOGS/HUMAN/") and os.path.isdir("./LOGS/HUMAN/")):
+        os.mkdir("./LOGS/HUMAN/")
+    if not(os.path.exists("./LOGS/FIRE/") and os.path.isdir("./LOGS/FIRE/")):
+        os.mkdir("./LOGS/FIRE/")
 
 
     parser = argparse.ArgumentParser(description='Watch Cameras for Humans')
