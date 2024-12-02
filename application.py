@@ -117,7 +117,6 @@ def ImageSaving_IO():
             camera_TID, img = printing_images_f.get()
             img_path = f"./saved_images/f_{camera_TID}.webp"
             cv.imwrite(img_path, img)
-            cv.imwrite(f"./saved_images/LOGGING_FIRE_{camera_TID}.webp", img)
             sending_images_f.put(img_path)
             
             del img
@@ -127,7 +126,6 @@ def ImageSaving_IO():
             camera_TID, img = printing_images_q.get()
             img_path = f"./saved_images/{camera_TID}.webp"
             cv.imwrite(img_path, img)
-            cv.imwrite(f"./saved_images/LOGGING_HUMAN_{camera_TID}.webp", img)
             sending_images_q.put(img_path)
             
             del img
@@ -144,6 +142,8 @@ def FireAnalysis():
     minimum_confidence = 0.55
     dec_window_size=25
     dec_window_approv=22
+    dec_window_release= max(0, min(10, dec_window_approv//2))
+
     dec_window_list_results=[]
     seen_before = False
 
@@ -163,10 +163,11 @@ def FireAnalysis():
 
                 if (not seen_before) and (sum([(1 if res.shape[0]>0 else 0) for res in dec_window_list_results]) >= dec_window_approv): # we have 5+ out of 50 positives
                     printing_images_f.put((camera_TID, img))
-                    # dec_window_list_results.clear()
                     seen_before = True
-                elif (seen_before) and (sum([(1 if res.shape[0]>0 else 0) for res in dec_window_list_results]) < dec_window_approv):
+                elif (seen_before) and (sum([(1 if res.shape[0]>0 else 0) for res in dec_window_list_results]) <= dec_window_release):
                     seen_before = False
+
+
                 
                 del img
                 del camera_TID
@@ -185,6 +186,8 @@ def HumanAnalysis():
     minimum_confidence = 0.6
     dec_window_size=15
     dec_window_approv=8 # Must be greater than zero
+    dec_window_release= max(0, min(5, dec_window_approv//2))
+
     dec_window_list_imgresults=[]
     has_seen = False
 
@@ -203,13 +206,11 @@ def HumanAnalysis():
                 # list of tuples of (optional(ndarray), int)
                 dec_window_list_imgresults.append((img if results > 0 else None, results)) 
                 
-                
 
-                if has_seen: # if an old detection has been sent
-                    if sum([i for _, i in dec_window_list_imgresults[-3:]])==0: # no detections triggered in last 3 frames
-                        dec_window_list_imgresults = dec_window_list_imgresults[-3:] # start afresh; keeping last 3 frames
-                        has_seen = False
-                
+
+
+
+
                 # remove older data if excess
                 while(len(dec_window_list_imgresults)>dec_window_size):
                     dec_window_list_imgresults.pop(0)
@@ -217,13 +218,18 @@ def HumanAnalysis():
                 
                 if not has_seen: # only trigger sending mechanism if old detection is not ongoing
                     # greater than 0 if overlap exits
-                    if sum([1 if i>0 else 0 for _, i in dec_window_list_imgresults]) >= dec_window_approv:
+                    if (sum([1 if i>0 else 0 for _, i in dec_window_list_imgresults]) >= dec_window_approv):
                         # Find image with the largest overlap with ROI
                         imgr, _ = max(dec_window_list_imgresults, key=lambda x: x[1])
                         # Send image for printing
                         if imgr is not None: # safety --> will only be an issue if `dec_window_approv==0`
                             printing_images_q.put((camera_TID, imgr)) 
                             has_seen = True
+                else: # if an old detection has been sent
+                    if (sum([i for _, i in dec_window_list_imgresults])<=dec_window_release): # no detections triggered in last 3 frames
+                        # dec_window_list_imgresults = dec_window_list_imgresults[-3:] # start afresh; keeping last 3 frames
+                        has_seen = False
+
                         
                         
                 del img
@@ -300,6 +306,7 @@ def ImageCapture_IO():
 def main():
     parser = argparse.ArgumentParser(description='Watch Cameras for Humans')
     parser.add_argument('--rtsp', type=str, help='rtsp link for camera', default=None)
+    parser.add_argument('--fpath', type=str, help='rtsp link for camera', default=None)
     parser.add_argument('--uuid', type=str, help='rtsp link for camera', default=None)
     parser.add_argument('--env_camera', type=int, help='index of camera from .env.json file', default=0)
     args = parser.parse_args()
@@ -312,13 +319,13 @@ def main():
         cameras_links.put(cameras[args.env_camera])
 
     else:
-        if (not ((args.rtsp is None) or (args.uuid is None))):
+        if ((args.uuid is not None) and (not (args.rtsp is None or args.fpath is None))):
             cameras_links.put({
                     "uid": args.uuid,
-                    "link": args.rtsp
+                    "link": (args.rtsp if args.rtsp is not None else args.fpath)
                 })
         else:
-            print("--rtsp or --uuid cannot be empty")
+            print("(--rtsp or --fpath) and --uuid cannot be empty")
             exit()
     
     
