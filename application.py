@@ -152,7 +152,7 @@ def FireAnalysis():
             while not capture_images_f.empty():
                 camera_TID, img = capture_images_f.get()
                 
-                results = model(img, stream=True, conf=minimum_confidence, classes=[0], device='cuda:1') # all classes for fire 0: smoke, 1: fire
+                results = model(img, stream=True, conf=minimum_confidence, classes=[0], device='cuda:1', verbose=False) # all classes for fire 0: smoke, 1: fire
                 results = [np.floor(result.boxes.xyxy.cpu().numpy()) for result in results][0]
                 
                 
@@ -197,7 +197,7 @@ def HumanAnalysis():
         try:
             while not capture_images_q.empty():
                 camera_TID, img = capture_images_q.get()
-                results = model(img, stream=True, conf=minimum_confidence, classes=[0], device='cuda:1') # only person class
+                results = model(img, stream=True, conf=minimum_confidence, classes=[0], device='cuda:1', verbose=False) # only person class
                 results = [np.floor(result.boxes.xyxy.cpu().numpy()) for result in results] # bring to xyxy numpy
 
                 #! Save image with label
