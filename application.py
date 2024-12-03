@@ -29,7 +29,6 @@ def ImageSending_IO():
     print("x_api_token loaded from .env file")
 
     while elegant_shutdown.empty():
-        dtm_ = datetime.datetime.now(pytz.utc).isoformat().split('+')[0]
 
         # Handle Fire Detection 
         while(not sending_images_f.empty()):
@@ -67,9 +66,9 @@ def ImageSending_IO():
 
 
                 if (not (alert_response.status_code >= 200 or alert_response.status_code <= 203)):
-                    logger.error(f"FIRE:\tURL Upload Unsuccessful_{dtm_}; response:{alert_response.status_code}")
+                    logger.error(f"FIRE:\tURL Upload Unsuccessful; response:{alert_response.status_code}")
             else:
-                logger.error(f"FIRE:\tImage Upload Unsuccessful_{dtm_}; response:{file_upload_response.status_code}")
+                logger.error(f"FIRE:\tImage Upload Unsuccessful; response:{file_upload_response.status_code}")
 
             # Delete image from disks
             os.remove(img_path) ## --> TODO: Exists for debugging
@@ -108,9 +107,9 @@ def ImageSending_IO():
                 logger.info(f"HUMAN:\tUploading URL Response:\t{alert_response.status_code},\t{json.dumps(alert_response)}")
                 
                 if (not (alert_response.status_code >= 200 or alert_response.status_code <= 203)):
-                    logger.error(f"HUMAN:\tURL Upload Unsuccessful_{dtm_}; response:{alert_response.status_code}")
+                    logger.error(f"HUMAN:\tURL Upload Unsuccessful; response:{alert_response.status_code}")
             else:
-                logger.error(f"HUMAN:\tImage Upload Unsuccessful_{dtm_}; response:{file_upload_response.status_code}")
+                logger.error(f"HUMAN:\tImage Upload Unsuccessful; response:{file_upload_response.status_code}")
 
             # Delete image from disks
             os.remove(img_path) ## --> TODO: Exists for debugging
@@ -131,14 +130,14 @@ def ImageSaving_IO():
         os.mkdir("./saved_images")
     
     while elegant_shutdown.empty():
-        dtm_ = datetime.datetime.now(pytz.utc).isoformat().split('+')[0]
+        # dtm_ = datetime.datetime.now(pytz.utc).isoformat().split('+')[0]
         while(not printing_images_f.empty()):
             camera_TID, img = printing_images_f.get()
             img_path = f"./saved_images/f_{camera_TID}.webp"
             cv.imwrite(img_path, img)
             sending_images_f.put(img_path)
 
-            logger.info(f"Saved Fire Image:{dtm_}")
+            logger.info(f"Saved Fire Image")
             
             del img
             del camera_TID
@@ -149,7 +148,7 @@ def ImageSaving_IO():
             cv.imwrite(img_path, img)
             sending_images_q.put(img_path)
 
-            logger.info(f"Saved Human Image:{dtm_}")
+            logger.info(f"Saved Human Image")
             
             del img
             del camera_TID
@@ -194,7 +193,7 @@ def FireAnalysis():
                 dec_window_list_results.append(resulting_flag) ## list of int flags; storing results
 
                 if (resulting_flag==1):
-                    logger.info(f"Fire Detected:\t{dtm_}")
+                    logger.info(f"Fire Detected")
 
                 while (len(dec_window_list_results)>dec_window_size): # only stores static number of images
                     dec_window_list_results.pop(0) # remove oldest image
