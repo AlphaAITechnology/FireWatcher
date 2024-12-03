@@ -312,7 +312,7 @@ def ImageCapture_IO():
                         recover = 0
                         dtm_ = datetime.datetime.now(pytz.utc).isoformat().split('+')[0]
                         # print(f"Sent Successful:\t{count}")
-                        logger.info(f"Read Frame: {count}; Sent to Model")
+                        logger.info(f"Read Frame: {count}:{dtm_}; Sent to Model")
                         capture_images_q.put((f"{dtm_}@{cameras_id}", frame[:,:,:]))
                         capture_images_f.put((f"{dtm_}@{cameras_id}", frame[:,:,:]))
                         del frame
