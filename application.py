@@ -323,7 +323,6 @@ def ImageCapture_IO():
     frame_const = fpso//2 # reading every fifth frame
 
     recover = 0
-    caught_at_time = int(np.floor(time.time()))
     while(elegant_shutdown.empty()):
         try:
             while cap.isOpened():
@@ -385,7 +384,8 @@ def main():
         os.mkdir("./LOGS/FILES/")
 
     logger = logging.getLogger(__name__)
-    logging.basicConfig(filename='./LOGS/FILES/status.logs', encoding='utf-8', level=logging.INFO)
+    logging.basicConfig(filename='./LOGS/FILES/status.logs', encoding='utf-8', level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s -\t%(message)s')
+    
 
 
     parser = argparse.ArgumentParser(description='Watch Cameras for Humans')
