@@ -179,6 +179,9 @@ def FireAnalysis():
 
 
 def HumanAnalysis():
+    logger = logging.getLogger(__name__)
+    logging.basicConfig(filename='HumanAnalysis.logs', encoding='utf-8', level=logging.INFO)
+
     model = YOLO("Weights/yolov8l.pt") 
     print("Human Model Loaded")
     with gzip.open("./FloorMask.csv.gz") as mask_gz:
@@ -204,7 +207,7 @@ def HumanAnalysis():
                 #! Save image with label
                 save_annotations = [result.tolist() for result in results if result.shape[0]>0]
                 if (len(save_annotations)>0): # human detetcted; annotations to save exists
-                    logging.info("Human Detected; Saving Frames to LOGS/HUMAN/")
+                    logger.info("Human Detected; Saving Frames to LOGS/HUMAN/")
                     with open(f"LOGS/HUMAN/{annotation_counter:0>8}.txt", 'w') as lf:
                         for coors in save_annotations:
                             lf.write(json.dumps(coors))
@@ -218,7 +221,7 @@ def HumanAnalysis():
                 # find max roi intersection for this image
                 results = max(results) if len(results)>0 else 0
                 if results>0:
-                    logging.info("Humans Entered into Region of Interest.")
+                    logger.info("Humans Entered into Region of Interest.")
 
                 # list of tuples of (optional(ndarray), int)
                 dec_window_list_imgresults.append((img if results > 0 else None, results)) 
@@ -240,13 +243,13 @@ def HumanAnalysis():
                         imgr, _ = max(dec_window_list_imgresults, key=lambda x: x[1])
                         # Send image for printing
                         if imgr is not None: # safety --> will only be an issue if `dec_window_approv==0`
-                            logging.info("Human alert sent; Alert deactivated.")
+                            logger.info("Human alert sent; Alert deactivated.")
                             printing_images_q.put((camera_TID, imgr)) 
                             has_seen = True
                 else: # if an old detection has been sent
                     if (sum([i for _, i in dec_window_list_imgresults])<=dec_window_release): # no detections triggered in last 3 frames
                         # dec_window_list_imgresults = dec_window_list_imgresults[-3:] # start afresh; keeping last 3 frames
-                        logging.info("Human has left Region of Interest; Alert activated.")
+                        logger.info("Human has left Region of Interest; Alert activated.")
                         has_seen = False
 
                         
@@ -264,6 +267,9 @@ def HumanAnalysis():
 
 
 def ImageCapture_IO():
+    logger = logging.getLogger(__name__)
+    logging.basicConfig(filename='ImageCapture.logs', encoding='utf-8', level=logging.INFO)
+
     cameras_link = None
     cameras_id = None
 
@@ -305,7 +311,8 @@ def ImageCapture_IO():
                     if ret and (capture_images_q.empty() and capture_images_f.empty()):
                         recover = 0
                         dtm_ = datetime.datetime.now(pytz.utc).isoformat().split('+')[0]
-                        print(f"Sent Successful:\t{count}")
+                        # print(f"Sent Successful:\t{count}")
+                        logger.info(f"Read Frame: {count}; Sent to Model")
                         capture_images_q.put((f"{dtm_}@{cameras_id}", frame[:,:,:]))
                         capture_images_f.put((f"{dtm_}@{cameras_id}", frame[:,:,:]))
                         del frame
@@ -323,6 +330,10 @@ def ImageCapture_IO():
 
 
 def main():
+    # logger = logging.getLogger(__name__)
+    # logging.basicConfig(filename='main.logs', encoding='utf-8', level=logging.INFO)
+
+
     if not(os.path.exists("./LOGS/") and os.path.isdir("./LOGS/")):
         os.mkdir("./LOGS/")
     if not(os.path.exists("./LOGS/HUMAN/") and os.path.isdir("./LOGS/HUMAN/")):
