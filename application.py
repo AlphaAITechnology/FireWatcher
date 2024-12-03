@@ -11,6 +11,7 @@ import queue
 import requests as req
 import threading
 import time
+import logging
 
 
 
@@ -202,7 +203,8 @@ def HumanAnalysis():
 
                 #! Save image with label
                 save_annotations = [result.tolist() for result in results if result.shape[0]>0]
-                if (len(save_annotations)>0): #annotations to save exists
+                if (len(save_annotations)>0): # human detetcted; annotations to save exists
+                    logging.info("Human Detected; Saving Frames to LOGS/HUMAN/")
                     with open(f"LOGS/HUMAN/{annotation_counter:0>8}.txt", 'w') as lf:
                         for coors in save_annotations:
                             lf.write(json.dumps(coors))
@@ -212,8 +214,11 @@ def HumanAnalysis():
                 
                 # get max roi intersection of each detection
                 results = [(max([np.add.reduce(roi_mask[max([int(y2)-1, 0]), int(x1):int(x2)].reshape((-1,))) for x1, _, x2, y2 in result.tolist()]) if result.shape[0]>0 else 0) for result in results] 
+                
                 # find max roi intersection for this image
                 results = max(results) if len(results)>0 else 0
+                if results>0:
+                    logging.info("Humans Entered into Region of Interest.")
 
                 # list of tuples of (optional(ndarray), int)
                 dec_window_list_imgresults.append((img if results > 0 else None, results)) 
@@ -235,11 +240,13 @@ def HumanAnalysis():
                         imgr, _ = max(dec_window_list_imgresults, key=lambda x: x[1])
                         # Send image for printing
                         if imgr is not None: # safety --> will only be an issue if `dec_window_approv==0`
+                            logging.info("Human alert sent; Alert deactivated.")
                             printing_images_q.put((camera_TID, imgr)) 
                             has_seen = True
                 else: # if an old detection has been sent
                     if (sum([i for _, i in dec_window_list_imgresults])<=dec_window_release): # no detections triggered in last 3 frames
                         # dec_window_list_imgresults = dec_window_list_imgresults[-3:] # start afresh; keeping last 3 frames
+                        logging.info("Human has left Region of Interest; Alert activated.")
                         has_seen = False
 
                         
