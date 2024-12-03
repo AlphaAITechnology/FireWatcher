@@ -10,6 +10,8 @@ testsamples/
 test.py
 sample.jpg
 
+burnup.sh
+
 #large objects activate lfs
 Weights/ 
 
