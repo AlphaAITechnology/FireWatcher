@@ -16,8 +16,7 @@ import logging
 
 
 def ImageSending_IO():
-    logger = logging.getLogger("ImageSending")
-    logging.basicConfig(filename='./LOGS/FILES/ImageSending.logs', encoding='utf-8', level=logging.INFO)
+    logger = logging.getLogger(__name__)
 
 
     base_url = "https://fire-api.alphaaitech.com"
@@ -122,8 +121,7 @@ def ImageSending_IO():
 
 
 def ImageSaving_IO():
-    logger = logging.getLogger("ImageSaving")
-    logging.basicConfig(filename='./LOGS/FILES/ImageSaving.logs', encoding='utf-8', level=logging.INFO)
+    logger = logging.getLogger(__name__)
 
     if os.path.exists("./saved_images"):
         if not os.path.isdir("./saved_images"):
@@ -161,8 +159,7 @@ def ImageSaving_IO():
 
 
 def FireAnalysis():
-    logger = logging.getLogger("Fire Analysis")
-    logging.basicConfig(filename='./LOGS/FILES/FireAnalysis.logs', encoding='utf-8', level=logging.INFO)
+    logger = logging.getLogger(__name__)
 
     model = YOLO("Weights/fire_v8l.pt")
     print("Fire Model Loaded")
@@ -213,8 +210,7 @@ def FireAnalysis():
 
 
 def HumanAnalysis():
-    logger = logging.getLogger("Human Analysis")
-    logging.basicConfig(filename='./LOGS/FILES/HumanAnalysis.logs', encoding='utf-8', level=logging.INFO)
+    logger = logging.getLogger(__name__)
 
     model = YOLO("Weights/yolov8l.pt") 
     print("Human Model Loaded")
@@ -297,8 +293,7 @@ def HumanAnalysis():
 
 
 def ImageCapture_IO():
-    logger = logging.getLogger("Image Capture")
-    logging.basicConfig(filename='./LOGS/FILES/ImageCapture.logs', encoding='utf-8', level=logging.INFO)
+    logger = logging.getLogger(__name__)
 
     cameras_link = None
     cameras_id = None
@@ -364,6 +359,9 @@ def ImageCapture_IO():
 
 
 def main():
+
+    logger = logging.getLogger(__name__)
+    logging.basicConfig(filename='./LOGS/FILES/status.logs', encoding='utf-8', level=logging.INFO)
 
     if not(os.path.exists("./LOGS/") and os.path.isdir("./LOGS/")):
         os.mkdir("./LOGS/")
