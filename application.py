@@ -39,7 +39,7 @@ def ImageSending_IO():
             camera_tstamp = camera_tstamp.split('_')[1]
             camera_id = camera_id.split('.')[0]
             
-            logger.info(f"Uploading Image:\t{img_path}")
+            logger.info(f"FIRE:\tUploading Image:\t{img_path}")
 
             with open(img_path, "rb") as files_:
                 # storing file
@@ -49,11 +49,11 @@ def ImageSending_IO():
                     headers={"x-api-token": x_api_token},
                 )
             
-            logger.info(f"Uploading Image Response:\t{file_upload_response.status_code},\t{json.dumps(file_upload_response)}")
+            logger.info(f"FIRE:\tUploading Image Response:\t{file_upload_response.status_code},\t{json.dumps(file_upload_response)}")
 
             if (file_upload_response.status_code == 201):
                 upload_response = json.loads(file_upload_response.text)
-                logger.info(f"Uploading URL:\t{upload_response["fileUrl"]}")
+                logger.info(f"FIRE:\tUploading URL:\t{upload_response["fileUrl"]}")
                 alert_response = req.post(
                         f"{base_url}/alert-record",
                         headers={"x-api-token": x_api_token},
@@ -64,17 +64,13 @@ def ImageSending_IO():
                             "alertAt": camera_tstamp
                         }
                     )
-                logger.info(f"Uploading URL Response:\t{alert_response.status_code},\t{json.dumps(alert_response)}")
+                logger.info(f"FIRE:\tUploading URL Response:\t{alert_response.status_code},\t{json.dumps(alert_response)}")
 
 
-
-                
-                if (alert_response.status_code >= 200 or alert_response.status_code <= 203):
-                    print(alert_response.text)
-                else:
-                    print("Alert Upload Unsucessful:\t", alert_response.status_code)
+                if (not (alert_response.status_code >= 200 or alert_response.status_code <= 203)):
+                    logger.error(f"FIRE:\tURL Upload Unsuccessful_{dtm_}; response:{alert_response.status_code}")
             else:
-                print("File Upload Unsucessful:\t", file_upload_response.status_code)
+                logger.error(f"FIRE:\tImage Upload Unsuccessful_{dtm_}; response:{file_upload_response.status_code}")
 
             # Delete image from disks
             os.remove(img_path) ## --> TODO: Exists for debugging
