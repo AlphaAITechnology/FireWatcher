@@ -246,7 +246,7 @@ def HumanAnalysis():
                 results = [np.floor(result.boxes.xyxy.cpu().numpy()) for result in results] # bring to xyxy numpy
 
 
-                #! Save Fire Images
+                #! Save Human Images
                 cv.imwrite(f"LOGS/HUMAN/{dtm_}.webp", img)
                 logger.info(f"HUMAN: saved image")
                 if (len([result.tolist() for result in results if result.shape[0]>0])>0):
@@ -254,6 +254,8 @@ def HumanAnalysis():
                         lf.write(json.dumps(results))
                     logger.info(f"HUMAN: saved bbox")
                 #! End Save
+
+
                 
                 # get max roi intersection of each detection
                 results = [(max([np.add.reduce(roi_mask[max([int(y2)-1, 0]), int(x1):int(x2)].reshape((-1,))) for x1, _, x2, y2 in result.tolist()]) if result.shape[0]>0 else 0) for result in results] 
