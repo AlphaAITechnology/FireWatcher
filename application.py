@@ -177,7 +177,7 @@ def FireAnalysis():
                 dtm_ = datetime.datetime.now(pytz.utc).isoformat().split('+')[0]
                 camera_TID, img = capture_images_f.get()
                 
-                results = model(img, stream=True, conf=minimum_confidence, classes=[0], device='cuda:1', verbose=False) # all classes for fire 0: smoke, 1: fire
+                results = model(img, stream=True, conf=minimum_confidence, classes=[0], device='cuda:1', verbose=False, save_txt=True, save=True, project="LOGS/FIRE/") # all classes for fire 0: smoke, 1: fire
                 results = [np.floor(result.boxes.xyxy.cpu().numpy()) for result in results][0]
                 
                 resulting_flag = 1 if results.shape[0]>0 else 0
@@ -231,19 +231,19 @@ def HumanAnalysis():
         try:
             while not capture_images_q.empty():
                 camera_TID, img = capture_images_q.get()
-                results = model(img, stream=True, conf=minimum_confidence, classes=[0], device='cuda:1', verbose=False) # only person class
+                results = model(img, stream=True, conf=minimum_confidence, classes=[0], device='cuda:1', verbose=False, save_txt=True, save=True, project="LOGS/HUMAN/") # only person class
                 results = [np.floor(result.boxes.xyxy.cpu().numpy()) for result in results] # bring to xyxy numpy
 
-                #! Save image with label
-                save_annotations = [result.tolist() for result in results if result.shape[0]>0]
-                if (len(save_annotations)>0): # human detetcted; annotations to save exists
-                    logger.info("Human Detected; Saving Frames to LOGS/HUMAN/")
-                    with open(f"LOGS/HUMAN/{annotation_counter:0>8}.txt", 'w') as lf:
-                        for coors in save_annotations:
-                            lf.write(json.dumps(coors))
-                    cv.imwrite(f"LOGS/HUMAN/{annotation_counter:0>8}.webp", img)
-                    annotation_counter+=1
-                #! End Saving Image with label
+                # #! Save image with label
+                # save_annotations = [result.tolist() for result in results if result.shape[0]>0]
+                # if (len(save_annotations)>0): # human detetcted; annotations to save exists
+                #     logger.info("Human Detected; Saving Frames to LOGS/HUMAN/")
+                #     with open(f"LOGS/HUMAN/{annotation_counter:0>8}.txt", 'w') as lf:
+                #         for coors in save_annotations:
+                #             lf.write(json.dumps(coors))
+                #     cv.imwrite(f"LOGS/HUMAN/{annotation_counter:0>8}.webp", img)
+                #     annotation_counter+=1
+                # #! End Saving Image with label
                 
                 # get max roi intersection of each detection
                 results = [(max([np.add.reduce(roi_mask[max([int(y2)-1, 0]), int(x1):int(x2)].reshape((-1,))) for x1, _, x2, y2 in result.tolist()]) if result.shape[0]>0 else 0) for result in results] 
