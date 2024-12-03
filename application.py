@@ -16,7 +16,7 @@ import logging
 
 
 def ImageSending_IO():
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger("ImageSending")
     logging.basicConfig(filename='./LOGS/FILES/ImageSending.logs', encoding='utf-8', level=logging.INFO)
 
 
@@ -122,7 +122,7 @@ def ImageSending_IO():
 
 
 def ImageSaving_IO():
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger("ImageSaving")
     logging.basicConfig(filename='./LOGS/FILES/ImageSaving.logs', encoding='utf-8', level=logging.INFO)
 
     if os.path.exists("./saved_images"):
@@ -161,7 +161,7 @@ def ImageSaving_IO():
 
 
 def FireAnalysis():
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger("Fire Analysis")
     logging.basicConfig(filename='./LOGS/FILES/FireAnalysis.logs', encoding='utf-8', level=logging.INFO)
 
     model = YOLO("Weights/fire_v8l.pt")
@@ -213,7 +213,7 @@ def FireAnalysis():
 
 
 def HumanAnalysis():
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger("Human Analysis")
     logging.basicConfig(filename='./LOGS/FILES/HumanAnalysis.logs', encoding='utf-8', level=logging.INFO)
 
     model = YOLO("Weights/yolov8l.pt") 
@@ -297,7 +297,7 @@ def HumanAnalysis():
 
 
 def ImageCapture_IO():
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger("Image Capture")
     logging.basicConfig(filename='./LOGS/FILES/ImageCapture.logs', encoding='utf-8', level=logging.INFO)
 
     cameras_link = None
