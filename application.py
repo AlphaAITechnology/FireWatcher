@@ -180,6 +180,15 @@ def FireAnalysis():
                 # results = model(img, stream=True, conf=minimum_confidence, classes=[0], device='cuda:1', verbose=False, save_txt=True, save=True, project="LOGS/FIRE/") # all classes for fire 0: smoke, 1: fire
                 results = model(img, stream=True, conf=minimum_confidence, classes=[0], device='cuda:1', verbose=False) 
                 results = [np.floor(result.boxes.xyxy.cpu().numpy()) for result in results][0]
+
+                #! Save Fire Images
+                cv.imwrite(f"LOGS/FIRE/{dtm_}.webp", img)
+                logger.debug(f"FIRE: saved image")
+                if results.shape[0]>0:
+                    with open("LOGS/FIRE/{dtm_}.txt", 'w') as lf:
+                        lf.write(json.dumps(results))
+                    logger.debug(f"FIRE: saved bbox")
+                #! End Save
                 
                 resulting_flag = 1 if results.shape[0]>0 else 0
                 dec_window_list_results.append(resulting_flag) ## list of int flags; storing results
@@ -312,12 +321,13 @@ def ImageCapture_IO():
     frame_const = fpso//2 # reading every fifth frame
 
     recover = 0
+    caught_at_time = int(np.floor(time.time()))
     while(elegant_shutdown.empty()):
         try:
             while cap.isOpened():
                 count += 1
-                ret = cap.grab()
 
+                ret = cap.grab()
                 if (not ret):
                     recover += 1
                     if (recover < 10):
@@ -348,9 +358,8 @@ def ImageCapture_IO():
                         capture_images_f.put((f"{dtm_}@{cameras_id}", frame[:,:,:]))
                         del frame
 
+                time.sleep(2/fpso)
 
-
-                time.sleep(1/fpso)
         except Exception as e:
             print(e)
         finally:
