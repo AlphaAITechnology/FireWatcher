@@ -185,7 +185,7 @@ def FireAnalysis():
                 cv.imwrite(f"LOGS/FIRE/{dtm_}.webp", img)
                 logger.info(f"FIRE: saved image")
                 if results.shape[0]>0:
-                    with open("LOGS/FIRE/{dtm_}.txt", 'w') as lf:
+                    with open(f"LOGS/FIRE/{dtm_}.txt", 'w') as lf:
                         lf.write(json.dumps(results))
                     logger.info(f"FIRE: saved bbox")
                 #! End Save
@@ -250,7 +250,7 @@ def HumanAnalysis():
                 cv.imwrite(f"LOGS/HUMAN/{dtm_}.webp", img)
                 logger.info(f"HUMAN: saved image")
                 if (len([result.tolist() for result in results if result.shape[0]>0])>0):
-                    with open("LOGS/HUMAN/{dtm_}.txt", 'w') as lf:
+                    with open(f"LOGS/HUMAN/{dtm_}.txt", 'w') as lf:
                         lf.write(json.dumps(results))
                     logger.info(f"HUMAN: saved bbox")
                 #! End Save
