@@ -183,11 +183,11 @@ def FireAnalysis():
 
                 #! Save Fire Images
                 cv.imwrite(f"LOGS/FIRE/{dtm_}.webp", img)
-                logger.debug(f"FIRE: saved image")
+                logger.info(f"FIRE: saved image")
                 if results.shape[0]>0:
                     with open("LOGS/FIRE/{dtm_}.txt", 'w') as lf:
                         lf.write(json.dumps(results))
-                    logger.debug(f"FIRE: saved bbox")
+                    logger.info(f"FIRE: saved bbox")
                 #! End Save
                 
                 resulting_flag = 1 if results.shape[0]>0 else 0
@@ -248,11 +248,11 @@ def HumanAnalysis():
 
                 #! Save Fire Images
                 cv.imwrite(f"LOGS/HUMAN/{dtm_}.webp", img)
-                logger.debug(f"HUMAN: saved image")
+                logger.info(f"HUMAN: saved image")
                 if (len([result.tolist() for result in results if result.shape[0]>0])>0):
                     with open("LOGS/HUMAN/{dtm_}.txt", 'w') as lf:
                         lf.write(json.dumps(results))
-                    logger.debug(f"HUMAN: saved bbox")
+                    logger.info(f"HUMAN: saved bbox")
                 #! End Save
                 
                 # get max roi intersection of each detection
