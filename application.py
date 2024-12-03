@@ -82,6 +82,8 @@ def ImageSending_IO():
             camera_tstamp, camera_id = os.path.basename(img_path).split('@')
             camera_id = camera_id.split('.')[0]
 
+
+            logger.info(f"HUMAN:\tUploading Image:\t{img_path}")
             with open(img_path, "rb") as files_:
                 # storing file
                 file_upload_response = req.post(
@@ -89,8 +91,11 @@ def ImageSending_IO():
                     files={'file': (img_path, files_, 'image/webp')},
                     headers={"x-api-token": x_api_token},
                 )
+            logger.info(f"HUMAN:\tUploading Image Response:\t{file_upload_response.status_code},\t{json.dumps(file_upload_response)}")
+
             if (file_upload_response.status_code == 201):
                 upload_response = json.loads(file_upload_response.text)
+                logger.info(f"HUMAN:\tUploading URL:\t{upload_response["fileUrl"]}")
                 alert_response = req.post(
                         f"{base_url}/alert-record",
                         headers={"x-api-token": x_api_token},
@@ -101,13 +106,12 @@ def ImageSending_IO():
                             "alertAt": camera_tstamp
                         }
                     )
+                logger.info(f"HUMAN:\tUploading URL Response:\t{alert_response.status_code},\t{json.dumps(alert_response)}")
                 
-                if (alert_response.status_code >= 200 or alert_response.status_code <= 203):
-                    print(alert_response.text)
-                else:
-                    print("Alert Upload Unsucessful:\t", alert_response.status_code)
+                if (not (alert_response.status_code >= 200 or alert_response.status_code <= 203)):
+                    logger.error(f"HUMAN:\tURL Upload Unsuccessful_{dtm_}; response:{alert_response.status_code}")
             else:
-                print("File Upload Unsucessful:\t", file_upload_response.status_code)
+                logger.error(f"HUMAN:\tImage Upload Unsuccessful_{dtm_}; response:{file_upload_response.status_code}")
 
             # Delete image from disks
             os.remove(img_path) ## --> TODO: Exists for debugging
@@ -320,17 +324,21 @@ def ImageCapture_IO():
                 if (not ret):
                     recover += 1
                     if (recover < 10):
-                        print("Grab Failure")
+                        logger.warning("Grab Failure")
                         cap.release()
+                        logger.warning("Released VideoCapture")
                         cap = cv.VideoCapture(cameras_link)
+                        logger.warning("Re-init VideoCapture")
                         continue
                     else:
+                        logger.error("Grab Failure")
                         raise ValueError("Grab Failure")
 
                 if (count%(frame_const//5) == 0): # keeping it to 5 frames per second or less
                     ret, frame = cap.retrieve()
     
                     if (not ret):
+                        logger.error("Retrieve Failure")
                         raise ValueError("Retrieve Failure")
 
 
