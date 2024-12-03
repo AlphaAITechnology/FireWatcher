@@ -47,7 +47,7 @@ def ImageSending_IO():
                     headers={"x-api-token": x_api_token},
                 )
             
-            logger.info(f"FIRE:\tUploading Image Response:\t{file_upload_response.status_code},\t{json.dumps(file_upload_response)}")
+            logger.info(f"FIRE:\tUploading Image Response:\t{file_upload_response.status_code}")
 
             if (file_upload_response.status_code == 201):
                 upload_response = json.loads(file_upload_response.text)
@@ -62,7 +62,7 @@ def ImageSending_IO():
                             "alertAt": camera_tstamp
                         }
                     )
-                logger.info(f"FIRE:\tUploading URL Response:\t{alert_response.status_code},\t{json.dumps(alert_response)}")
+                logger.info(f"FIRE:\tUploading URL Response:\t{alert_response.status_code}")
 
 
                 if (not (alert_response.status_code >= 200 or alert_response.status_code <= 203)):
