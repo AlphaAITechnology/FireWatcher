@@ -177,7 +177,8 @@ def FireAnalysis():
                 dtm_ = datetime.datetime.now(pytz.utc).isoformat().split('+')[0]
                 camera_TID, img = capture_images_f.get()
                 
-                results = model(img, stream=True, conf=minimum_confidence, classes=[0], device='cuda:1', verbose=False, save_txt=True, save=True, project="LOGS/FIRE/") # all classes for fire 0: smoke, 1: fire
+                # results = model(img, stream=True, conf=minimum_confidence, classes=[0], device='cuda:1', verbose=False, save_txt=True, save=True, project="LOGS/FIRE/") # all classes for fire 0: smoke, 1: fire
+                results = model(img, stream=True, conf=minimum_confidence, classes=[0], device='cuda:1', verbose=False) 
                 results = [np.floor(result.boxes.xyxy.cpu().numpy()) for result in results][0]
                 
                 resulting_flag = 1 if results.shape[0]>0 else 0
@@ -231,7 +232,8 @@ def HumanAnalysis():
         try:
             while not capture_images_q.empty():
                 camera_TID, img = capture_images_q.get()
-                results = model(img, stream=True, conf=minimum_confidence, classes=[0], device='cuda:1', verbose=False, save_txt=True, save=True, project="LOGS/HUMAN/") # only person class
+                # results = model(img, stream=True, conf=minimum_confidence, classes=[0], device='cuda:1', verbose=False, save_txt=True, save=True, project="LOGS/HUMAN/") # only person class
+                results = model(img, stream=True, conf=minimum_confidence, classes=[0], device='cuda:1', verbose=False)
                 results = [np.floor(result.boxes.xyxy.cpu().numpy()) for result in results] # bring to xyxy numpy
 
                 # #! Save image with label
