@@ -362,8 +362,7 @@ def ImageCapture_IO():
 
 def main():
 
-    logger = logging.getLogger(__name__)
-    logging.basicConfig(filename='./LOGS/FILES/status.logs', encoding='utf-8', level=logging.INFO)
+    
 
     if not(os.path.exists("./LOGS/") and os.path.isdir("./LOGS/")):
         os.mkdir("./LOGS/")
@@ -373,6 +372,9 @@ def main():
         os.mkdir("./LOGS/FIRE/")
     if not(os.path.exists("./LOGS/FILES/") and os.path.isdir("./LOGS/FILES/")):
         os.mkdir("./LOGS/FILES/")
+
+    logger = logging.getLogger(__name__)
+    logging.basicConfig(filename='./LOGS/FILES/status.logs', encoding='utf-8', level=logging.INFO)
 
 
     parser = argparse.ArgumentParser(description='Watch Cameras for Humans')
