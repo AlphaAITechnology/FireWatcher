@@ -253,7 +253,9 @@ def HumanAnalysis():
                     with open(f"LOGS/HUMAN/{dtm_}.txt", 'w') as lf:
                         lf.write(json.dumps(ann))
                     logger.info(f"HUMAN: saved bbox")
-                
+
+                    # Placing here so that it also signifies if human was seen
+                    logger.info(f"ROI Images:{sum([1 if i>0 else 0 for _, i in dec_window_list_imgresults])}; window_size: {dec_window_size}, approval:{dec_window_approv}, release: {dec_window_release}")    
                 #! End Save
 
 
@@ -274,7 +276,7 @@ def HumanAnalysis():
                 while(len(dec_window_list_imgresults)>dec_window_size):
                     dec_window_list_imgresults.pop(0)
 
-                logger.info(f"ROI Images:{sum([1 if i>0 else 0 for _, i in dec_window_list_imgresults])}; window_size: {dec_window_size}, approval:{dec_window_approv}, release: {dec_window_release}")    
+                
                     
 
                 if not has_seen: # only trigger sending mechanism if old detection is not ongoing
