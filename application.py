@@ -171,6 +171,7 @@ def FireAnalysis():
     while elegant_shutdown.empty():
         try:
             while not capture_images_f.empty():
+                logger.info("Passing Image to Fire Model")
                 dtm_ = datetime.datetime.now(pytz.utc).isoformat().split('+')[0]
                 camera_TID, img = capture_images_f.get()
                 
@@ -235,6 +236,7 @@ def HumanAnalysis():
     while elegant_shutdown.empty():
         try:
             while not capture_images_q.empty():
+                logger.info("Passing Image to Human Model")
                 dtm_ = datetime.datetime.now(pytz.utc).isoformat().split('+')[0]
 
                 camera_TID, img = capture_images_q.get()
@@ -251,6 +253,7 @@ def HumanAnalysis():
                     with open(f"LOGS/HUMAN/{dtm_}.txt", 'w') as lf:
                         lf.write(json.dumps(ann))
                     logger.info(f"HUMAN: saved bbox")
+                logger.info(f"{len(ann)}; window_size: {dec_window_size}, approval:{dec_window_approv}, release: {dec_window_release}")    
                 #! End Save
 
 
