@@ -317,7 +317,9 @@ def ImageCapture_IO():
             cameras_link = cameras_il["link"]
             cameras_id = cameras_il["uid"]
 
-    cap = cv.VideoCapture(cameras_link)
+    cap = cv.VideoCapture(cameras_link, cv.CAP_FFMPEG)
+    cap.set(cv.CAP_PROP_BUFFERSIZE, 3)
+    
     fpso = cap.get(cv.CAP_PROP_FPS) * 2
     count = -1       # counting number of frames read
     frame_const = fpso//2 # reading every fifth frame
