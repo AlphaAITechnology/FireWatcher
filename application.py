@@ -170,7 +170,7 @@ def FireAnalysis():
     while elegant_shutdown.empty():
         try:
             while not capture_images_f.empty():
-                logger.info("Passing Image to Fire Model")
+                logger.debug("Passing Image to Fire Model")
                 dtm_ = datetime.datetime.now(pytz.utc).isoformat().split('+')[0]
                 camera_TID, img = capture_images_f.get()
                 
@@ -234,7 +234,7 @@ def HumanAnalysis():
     while elegant_shutdown.empty():
         try:
             while not capture_images_q.empty():
-                logger.info("Passing Image to Human Model")
+                logger.debug("Passing Image to Human Model")
                 dtm_ = datetime.datetime.now(pytz.utc).isoformat().split('+')[0]
 
                 camera_TID, img = capture_images_q.get()
@@ -353,7 +353,7 @@ def ImageCapture_IO():
                         recover = 0
                         dtm_ = datetime.datetime.now(pytz.utc).isoformat().split('+')[0]
                         # print(f"Sent Successful:\t{count}")
-                        logger.info(f"Read Frame: {count}; Sent to Model")
+                        logger.debug(f"Read Frame: {count}; Sent to Model")
                         capture_images_q.put((f"{dtm_}@{cameras_id}", frame[:,:,:]))
                         capture_images_f.put((f"{dtm_}@{cameras_id}", frame[:,:,:]))
                         del frame
