@@ -1,6 +1,5 @@
 .env.json
 .env
-environment.yml
 saved_images/
 *.csv
 libs/__pycache__
