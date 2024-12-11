@@ -13,7 +13,7 @@ This project is reliant on a mask being available so that the AI would have a wa
 This mask is obtained by taking a snapshot of the area and drawing a region of interest on the floor.  
 The floor is mapped out (to preserve orientation) by selecting four corners in a clockwise (or anti-clockwise) manner and a point is selected to draw one or more Region of Interest. If the area needs to be larger the circumference of the circle can be enlarged.
 
-Use the command: `python ROI_Builder.py --img_path <<camera scene>> --save_path <<csv file>> --size <<circle size (optional)>>`  
+Use the command: `python build_floor_mask.py --img_path <<camera scene>> --save_path <<csv file>> --size <<circle size (optional)>>`  
 The csv file would then need to be compressed using command: `gzip --best -v <<csv file>>`
 
 In the current project we are using the file `FloorMask.csv.gz` to hold the region of interest.  
