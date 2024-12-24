@@ -389,9 +389,9 @@ def main():
 
     parser = argparse.ArgumentParser(description='Watch Cameras for Humans')
     parser.add_argument('--rtsp', type=str, help='rtsp link for camera', default=None)
-    parser.add_argument('--fpath', type=str, help='rtsp link for camera', default=None)
-    parser.add_argument('--uuid', type=str, help='rtsp link for camera', default=None)
-    parser.add_argument('--env_camera', type=int, help='index of camera from .env.json file', default=0)
+    parser.add_argument('--fpath', type=str, help='path to video file', default=None)
+    parser.add_argument('--uuid', type=str, help='Assigned UUID for rtsp link', default=None)
+    parser.add_argument('--env_camera', type=int, help='Index of camera from .env.json file', default=0)
     args = parser.parse_args()
 
     cameras = None
